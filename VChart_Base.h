@@ -86,6 +86,9 @@ public:
     bool ShowGridLines() const;
     void setShowGridLines(bool ShowGridLines);
 
+    bool ShowGridLabels() const;
+    void setShowGridLabels(bool ShowGridLabels);
+
 protected:
     QElapsedTimer           m_RenderETimer;
     QElapsedTimer           m_AutoZoomETimer;

@@ -655,6 +655,16 @@ void VChart_Base::setShowGridLines(bool ShowGridLines)
     m_ShowGridLines = ShowGridLines;
 }
 
+bool VChart_Base::ShowGridLabels() const
+{
+    return m_ShowGridLabels;
+}
+
+void VChart_Base::setShowGridLabels(bool ShowGridLabels)
+{
+    m_ShowGridLabels = ShowGridLabels;
+}
+
 /////////////////////////
 
 void VChart_Base::ForceUpdate()
