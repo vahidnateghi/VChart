@@ -12,6 +12,8 @@
 #include "VChartDefines.h"
 #include "Channels/Channel_Base.h"
 
+// FIRST COMMENT!
+
 #define MAX_VALUE 999999999999999999
 #define MIN_VALUE -999999999999999999
 #define MAX_DEPTH 10.0
