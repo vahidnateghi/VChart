@@ -9,6 +9,7 @@
 #include <QWheelEvent>
 #include <QPointF>
 #include <QElapsedTimer>
+#include <QTimer>
 #include "VChartDefines.h"
 #include "Channels/Channel_Base.h"
 
@@ -89,6 +90,9 @@ public:
     bool ShowGridLabels() const;
     void setShowGridLabels(bool ShowGridLabels);
 
+    int InfoMaxAgeMS() const;
+    void setInfoMaxAgeMS(int InfoMaxAgeMS);
+
 protected:
     QElapsedTimer           m_RenderETimer;
     QElapsedTimer           m_AutoZoomETimer;
@@ -123,6 +127,8 @@ protected:
     double                  m_AutoZoomMaxY;
     double                  m_AutoZoomMinY;
     double                  m_InforAlpha;
+    int                     m_InfoMaxAgeMS;
+    QTimer*                 m_MsgTimer;
     double                  m_MinXSpan;
     double                  m_MinYSpan;
     MsgType                 m_InfoType;
@@ -166,6 +172,9 @@ protected:
     QPointF                 ScopeToMouseCoor(QPointF);
     QPointF                 mouseToScopeRatio(QPointF);
     QPointF                 ScopeToMouseRatio(QPointF);
+
+private slots:
+    void                    SltPrMsgTimerTimeout();
 
 signals:
     void SgTrackedClick(QPointF);

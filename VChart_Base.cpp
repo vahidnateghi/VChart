@@ -45,10 +45,10 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
 //    m_AutoZoomMinX                          = std::numeric_limits<double>::max();
 //    m_AutoZoomMaxY                          = std::numeric_limits<double>::min();
 //    m_AutoZoomMinY                          = std::numeric_limits<double>::max();
-    m_AutoZoomMaxX                          = MIN_VALUE;
-    m_AutoZoomMinX                          = MAX_VALUE;
-    m_AutoZoomMaxY                          = MIN_VALUE;
-    m_AutoZoomMinY                          = MAX_VALUE;
+    m_AutoZoomMaxX                          = (double)MIN_VALUE;
+    m_AutoZoomMinX                          = (double)MAX_VALUE;
+    m_AutoZoomMaxY                          = (double)MIN_VALUE;
+    m_AutoZoomMinY                          = (double)MAX_VALUE;
     m_BoundaryLeftDefault                   = -1000;
     m_BoundaryRightDefault                  = 1000;
     m_BoundaryBottomDefault                 = -1000;
@@ -67,6 +67,11 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
     m_AutoZoomType                          = AutoZoom_Default;
 
     m_InfoType                              = MsgType_None;
+    m_InfoMaxAgeMS                          = 2000;
+    m_MsgTimer                              = new QTimer();
+    m_MsgTimer->setInterval( 50 );
+    connect( m_MsgTimer, &QTimer::timeout, this,  &VChart_Base::SltPrMsgTimerTimeout);
+
 
     m_UpdateInterval                        = 100;
     m_AutoZoomInterval                      = 1000;
@@ -412,7 +417,9 @@ void VChart_Base::enterEvent(QEvent *)
 {
     m_IsMouseInside = true;
 
+    m_InfoType = MsgType_Title;
     m_InforAlpha = 1.0;
+    m_MsgTimer->start();
 }
 
 /////////////////////////
@@ -665,6 +672,16 @@ void VChart_Base::setShowGridLabels(bool ShowGridLabels)
     m_ShowGridLabels = ShowGridLabels;
 }
 
+int VChart_Base::InfoMaxAgeMS() const
+{
+    return m_InfoMaxAgeMS;
+}
+
+void VChart_Base::setInfoMaxAgeMS(int InfoMaxAgeMS)
+{
+    m_InfoMaxAgeMS = InfoMaxAgeMS;
+}
+
 /////////////////////////
 
 void VChart_Base::ForceUpdate()
@@ -822,16 +839,17 @@ void VChart_Base::DoForeGrnPaitings()
         glEnd();
     }
 
-    if( m_InforAlpha > 0 )
+
+    if( m_InforAlpha > 0.0 )
     {
         if( m_InfoType == MsgType_Title )
         {
-            glColor4d( 1.0, 1.0, 1.0, m_InforAlpha );
+            glColor4d( 1.0, 1.0, 1.0, m_InforAlpha);
             QFont font;
             font.setPixelSize( 30 );
             font.setBold( true );
             QFontMetrics *fm = new QFontMetrics( font );
-            int len = fm->width( m_Title );
+            int len = fm->horizontalAdvance( m_Title );
             renderText( width() / 2 - len / 2, 50, m_Title, font );
         }
         else if( m_InfoType == MsgType_Msg )
@@ -841,11 +859,9 @@ void VChart_Base::DoForeGrnPaitings()
             font.setPixelSize( 30 );
             font.setBold( true );
             QFontMetrics *fm = new QFontMetrics( font );
-            int len = fm->width( m_Message );
+            int len = fm->horizontalAdvance( m_Message );
             renderText( width() / 2 - len / 2, 50, m_Message, font );
         }
-
-        m_InforAlpha -= 0.1;
     }
 }
 
@@ -912,4 +928,19 @@ QPointF VChart_Base::ScopeToMouseRatio(QPointF p)
     double y = p.y() * h / dBoundVer;
 
     return QPointF(x, y);
+}
+
+/////////////////////////
+
+void VChart_Base::SltPrMsgTimerTimeout()
+{
+    double Minus =  (double)m_InfoMaxAgeMS / m_MsgTimer->interval();
+    m_InforAlpha -= ( 1.0 / Minus );
+    TryUpdate();
+    if( m_InforAlpha <= 0 )
+    {
+        m_InforAlpha = 0.0;
+        m_InfoType = MsgType_None;
+        m_MsgTimer->stop();
+    }
 }
