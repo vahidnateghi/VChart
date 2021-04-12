@@ -417,9 +417,12 @@ void VChart_Base::enterEvent(QEvent *)
 {
     m_IsMouseInside = true;
 
-    m_InfoType = MsgType_Title;
-    m_InforAlpha = 1.0;
-    m_MsgTimer->start();
+    if( m_Title != "" )
+    {
+        m_InfoType = MsgType_Title;
+        m_InforAlpha = 1.0;
+        m_MsgTimer->start();
+    }
 }
 
 /////////////////////////
