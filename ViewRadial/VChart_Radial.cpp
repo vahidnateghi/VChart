@@ -80,7 +80,7 @@ void VChart_Radial::DoBackGrnPaitings()
 
         glDisableClientState( GL_VERTEX_ARRAY );
     }
-    if(m_ShowGridLabels)
+    if( m_ShowGridLabelsX )
     {
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
         QColor tColor = QColor( Qt::white );

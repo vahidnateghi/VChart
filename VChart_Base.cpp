@@ -11,7 +11,8 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
     m_IsMouseRightBtnPressed                = false;
     m_IsMouseInside                         = false;
     m_ShowInfo                              = false;
-    m_ShowGridLabels                        = true;
+    m_ShowGridLabelsX                       = true;
+    m_ShowGridLabelsY                       = true;
     m_ShowGridLines                         = true;
     m_ShowMouseAnnot                        = true;
     m_RestrictionLeftEn                     = false;
@@ -665,14 +666,10 @@ void VChart_Base::setShowGridLines(bool ShowGridLines)
     m_ShowGridLines = ShowGridLines;
 }
 
-bool VChart_Base::ShowGridLabels() const
+void VChart_Base::setShowGridLabels(bool ShowGridLabelsX, bool ShowGridLabelsY)
 {
-    return m_ShowGridLabels;
-}
-
-void VChart_Base::setShowGridLabels(bool ShowGridLabels)
-{
-    m_ShowGridLabels = ShowGridLabels;
+    m_ShowGridLabelsX = ShowGridLabelsX;
+    m_ShowGridLabelsY = ShowGridLabelsY;
 }
 
 int VChart_Base::InfoMaxAgeMS() const
@@ -776,7 +773,7 @@ void VChart_Base::DoBackGrnPaitings()
         }
         glDisable(GL_LINE_STIPPLE);
     }
-    if(m_ShowGridLabels)
+    if(m_ShowGridLabelsX)
     {
         glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
         QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
@@ -789,7 +786,13 @@ void VChart_Base::DoBackGrnPaitings()
                         QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumber),
                         font);
         }
+    }
 
+    if( m_ShowGridLabelsY )
+    {
+        glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
+        QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
+        QFont font = m_GridLabelFont;
         for( int i = 1; i < VER_GRID_CNT+ 1; i++ )
         {
             QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));

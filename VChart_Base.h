@@ -87,8 +87,7 @@ public:
     bool ShowGridLines() const;
     void setShowGridLines(bool ShowGridLines);
 
-    bool ShowGridLabels() const;
-    void setShowGridLabels(bool ShowGridLabels);
+    void setShowGridLabels(bool ShowGridLabelsX, bool ShowGridLabelsY);
 
     int InfoMaxAgeMS() const;
     void setInfoMaxAgeMS(int InfoMaxAgeMS);
@@ -101,7 +100,8 @@ protected:
     bool                    m_IsMouseInside;
     bool                    m_ShowInfo;
     bool                    m_ShowGridLines;
-    bool                    m_ShowGridLabels;
+    bool                    m_ShowGridLabelsX;
+    bool                    m_ShowGridLabelsY;
     bool                    m_ShowMouseAnnot;
     bool                    m_RestrictionLeftEn;
     bool                    m_RestrictionRightEn;
