@@ -83,6 +83,9 @@ public:
     QFont GridLabelFont() const;
     void setGridLabelFont(const QFont &GridLabelFont);
 
+    bool ShowGridLines() const;
+    void setShowGridLines(bool ShowGridLines);
+
 protected:
     QElapsedTimer           m_RenderETimer;
     QElapsedTimer           m_AutoZoomETimer;

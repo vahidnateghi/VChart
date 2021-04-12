@@ -645,6 +645,16 @@ void VChart_Base::setGridLabelFont(const QFont &GridLabelFont)
     m_GridLabelFont = GridLabelFont;
 }
 
+bool VChart_Base::ShowGridLines() const
+{
+    return m_ShowGridLines;
+}
+
+void VChart_Base::setShowGridLines(bool ShowGridLines)
+{
+    m_ShowGridLines = ShowGridLines;
+}
+
 /////////////////////////
 
 void VChart_Base::ForceUpdate()
