@@ -626,45 +626,63 @@ void VChart_Base::TrackMyClick()
     m_TrackClick = true;
 }
 
+/////////////////////////
+
 QColor VChart_Base::GridColor() const
 {
     return m_GridColor;
 }
+
+/////////////////////////
 
 void VChart_Base::setGridColor(const QColor &GridColor)
 {
     m_GridColor = GridColor;
 }
 
+/////////////////////////
+
 QColor VChart_Base::GridLabelColor() const
 {
     return m_GridLabelColor;
 }
+
+/////////////////////////
 
 void VChart_Base::setGridLabelColor(const QColor &GridLabelColor)
 {
     m_GridLabelColor = GridLabelColor;
 }
 
+/////////////////////////
+
 QFont VChart_Base::GridLabelFont() const
 {
     return m_GridLabelFont;
 }
+
+/////////////////////////
 
 void VChart_Base::setGridLabelFont(const QFont &GridLabelFont)
 {
     m_GridLabelFont = GridLabelFont;
 }
 
+/////////////////////////
+
 bool VChart_Base::ShowGridLines() const
 {
     return m_ShowGridLines;
 }
 
+/////////////////////////
+
 void VChart_Base::setShowGridLines(bool ShowGridLines)
 {
     m_ShowGridLines = ShowGridLines;
 }
+
+/////////////////////////
 
 void VChart_Base::setShowGridLabels(bool ShowGridLabelsX, bool ShowGridLabelsY)
 {
@@ -672,10 +690,14 @@ void VChart_Base::setShowGridLabels(bool ShowGridLabelsX, bool ShowGridLabelsY)
     m_ShowGridLabelsY = ShowGridLabelsY;
 }
 
+/////////////////////////
+
 int VChart_Base::InfoMaxAgeMS() const
 {
     return m_InfoMaxAgeMS;
 }
+
+/////////////////////////
 
 void VChart_Base::setInfoMaxAgeMS(int InfoMaxAgeMS)
 {
@@ -797,7 +819,7 @@ void VChart_Base::DoBackGrnPaitings()
         {
             QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));
             renderText( lPos.x(),
-                        lPos.y(),
+                        height() - lPos.y(),
                         QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumber),
                         font);
         }
@@ -898,8 +920,8 @@ QPointF VChart_Base::ScopeToMouseCoor(QPointF p)
     double dBoundHor = m_BoundaryRight - m_BoundaryLeft;
     double dBoundVer = m_BoundaryTop - m_BoundaryBottom;
 
-    double x = (p.x() - m_BoundaryLeft)*w / dBoundHor;
-    double y = (p.y() - m_BoundaryBottom)*h / dBoundVer;
+    double x = ( p.x() - m_BoundaryLeft ) * w / dBoundHor;
+    double y = ( p.y() - m_BoundaryBottom ) * h / dBoundVer;
 
     return QPointF(x, y);
 }
