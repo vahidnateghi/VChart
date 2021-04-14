@@ -237,6 +237,26 @@ void VChart_Base::SetDefaultBoundaries(double left, double right, double bottom,
 
 /////////////////////////
 
+void VChart_Base::setAxisXRange(double left, double right)
+{
+    m_BoundaryLeft = left;
+    m_BoundaryRight = right;
+
+    setBoundaries();
+}
+
+/////////////////////////
+
+void VChart_Base::setAxisYRange(double bot, double top)
+{
+    m_BoundaryBottom = bot;
+    m_BoundaryTop = top;
+
+    setBoundaries();
+}
+
+/////////////////////////
+
 void VChart_Base::SetRestrictions(bool LeftEn, double Left, bool RightEn, double Right, bool BotEn, double Bot, bool TopEn, double Top)
 {
     m_RestrictionLeftEn = LeftEn;
@@ -333,7 +353,7 @@ void VChart_Base::mouseMoveEvent(QMouseEvent *e)
         m_MousePanBasePos = e->pos();
     }
 
-    TryUpdate();
+    TryUpdate( );
 }
 
 /////////////////////////
@@ -550,24 +570,29 @@ void VChart_Base::TryUpdate()
         updateGL();
     }
 
+
     if( m_AutoZoomETimer.elapsed() > m_AutoZoomInterval && ( m_AutoZoomType == AutoZoom_PeriodicCalculated || m_AutoZoomType == AutoZoom_Calculated ) )
     {
         m_AutoZoomETimer.restart();
-        if( m_AutoZoomMaxX  != std::numeric_limits<double>::min() &&
-            m_AutoZoomMinX  != std::numeric_limits<double>::max() &&
-            m_AutoZoomMaxY  != std::numeric_limits<double>::min() &&
-            m_AutoZoomMinY  != std::numeric_limits<double>::max() )
+        if( m_AutoZoomMaxX  > (double)MIN_VALUE &&
+            m_AutoZoomMinX  < (double)MAX_VALUE &&
+            m_AutoZoomMaxY  > (double)MIN_VALUE &&
+            m_AutoZoomMinY  < (double)MAX_VALUE )
         {
             if( m_AutoZoomType == AutoZoom_PeriodicCalculated )
             {
-                setBoundaries( m_AutoZoomMinX, m_AutoZoomMaxX, m_AutoZoomMinY, m_AutoZoomMaxY );
+                double XSpacing = m_AutoZoomMaxX - m_AutoZoomMinX;
+                double YSpacing = m_AutoZoomMaxY - m_AutoZoomMinY;
+                setBoundaries( m_AutoZoomMinX - XSpacing / 10.0 , m_AutoZoomMaxX + XSpacing / 10.0,
+                               m_AutoZoomMinY - YSpacing / 10.0, m_AutoZoomMaxY + YSpacing / 10.0 );
+                emit SgBoundariesChanged( m_BoundaryLeft, m_BoundaryRight, m_BoundaryBottom, m_BoundaryTop );
             }
         }
 
-        m_AutoZoomMaxX                          = MIN_VALUE;
-        m_AutoZoomMinX                          = MAX_VALUE;
-        m_AutoZoomMaxY                          = MIN_VALUE;
-        m_AutoZoomMinY                          = MAX_VALUE;
+        m_AutoZoomMaxX                          = (double)MIN_VALUE;
+        m_AutoZoomMinX                          = (double)MAX_VALUE;
+        m_AutoZoomMaxY                          = (double)MIN_VALUE;
+        m_AutoZoomMinY                          = (double)MAX_VALUE;
     }
 }
 
@@ -964,7 +989,7 @@ void VChart_Base::SltPrMsgTimerTimeout()
 {
     double Minus =  (double)m_InfoMaxAgeMS / m_MsgTimer->interval();
     m_InforAlpha -= ( 1.0 / Minus );
-    TryUpdate();
+    TryUpdate( );
     if( m_InforAlpha <= 0 )
     {
         m_InforAlpha = 0.0;

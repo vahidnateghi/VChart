@@ -25,7 +25,7 @@ void VChart_Scatter::AddChannel(QString Title, QColor Color, Enum_PointShape Poi
 
 /////////////////////////
 
-void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt)
+void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt, bool Update)
 {
     if(Idx < 0 || Idx >= m_Channels.count() || pnt.count() == 0)
         return;
@@ -78,7 +78,7 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt)
                 float x = tSize.x() / 2.0 * cosf(theta);//calculate the x component
                 float y = tSize.y() / 2.0 * sinf(theta);//calculate the y component
 
-                tPoints.append( vVertex(x + pnt[i].x(), y + pnt[i].y(), -( MAX_DEPTH - (double)Idx / MAX_DEPTH )) );
+                tPoints.append( vVertex(x + pnt[i].x(), y + pnt[i].y(), 0/*-( MAX_DEPTH - (double)Idx / MAX_DEPTH )*/) );
             }
         }
     }
@@ -137,7 +137,7 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt)
             m_AutoZoomMaxY = qMax(m_AutoZoomMaxY, pnt[i].y());
             m_AutoZoomMinY = qMin(m_AutoZoomMinY, pnt[i].y());
 
-            tPoints.append( vVertex(pnt[i].x(), pnt[i].y(), -( MAX_DEPTH - (double)Idx / MAX_DEPTH )) );
+            tPoints.append( vVertex(pnt[i].x(), pnt[i].y(), 0) );
         }
     }
     makeCurrent();
@@ -155,12 +155,26 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt)
     grp->Opacity     = 1.0;
     grp->StartTime   = QDateTime::currentDateTime();
 
+    if( tChannel->FadeDuration() <= 0 )
+    {
+        for( int i = tChannel->Groups()->count() - 1 ; i >= 0 ; i-- )
+        {
+            GLuint buffToBeDeleted = tChannel->Groups()->at(i)->BufferID;
+            glDeleteBuffers( 1, &buffToBeDeleted );
+            delete tChannel->Groups()->at(i);
+            tChannel->Groups()->removeAt(i);
+        }
+    }
+
     tChannel->Groups()->append( grp );
+
+    if( Update )
+        TryUpdate();
 }
 
 /////////////////////////
 
-void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &Points, const QVector<QString> &Labels)
+void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &Points, const QVector<QString> &Labels, bool Update)
 {
     if(Idx < 0 || Idx >= m_Channels.count() || Points.count() == 0)
         return;
@@ -170,6 +184,8 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &Points, const QV
     AddPoints(Idx, Points);
     tChannel->setLabels( Labels );
 
+    if( Update )
+        TryUpdate();
 }
 
 /////////////////////////

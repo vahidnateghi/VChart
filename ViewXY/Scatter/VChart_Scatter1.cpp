@@ -22,7 +22,7 @@ void VChart_Scatter1::paintGL()
         for(int i = tChannel->Groups()->count() - 1; i >= 0; i--)
         {
             qint64 age = tChannel->Groups()->at(i)->StartTime.msecsTo( QDateTime::currentDateTime() );
-            if( age > tChannel->FadeDuration() )
+            if( tChannel->FadeDuration() > 0 && age > tChannel->FadeDuration() )
             {
                 GLuint buffToBeDeleted = tChannel->Groups()->at(i)->BufferID;
                 glDeleteBuffers( 1, &buffToBeDeleted );
@@ -57,8 +57,8 @@ void VChart_Scatter1::paintGL()
             }
             else if(tChannel->PointShape() == Shape_Point)
             {
-                QPointF tpSize = ScopeToMouseRatio( QPointF( tChannel->PointSizeX(), tChannel->PointSizeX() ) );
-                glPointSize( tpSize.x() );
+//                QPointF tpSize = ScopeToMouseRatio( QPointF( tChannel->PointSizeX(), tChannel->PointSizeX() ) );
+                glPointSize( tChannel->PointSizeX() );
                 int Reso = (int)tChannel->PointShape();
                 int tPntSize = tChannel->Groups()->at(i)->PointCnt / Reso;
                 for(int j = 0; j < tPntSize; j++)
@@ -76,7 +76,8 @@ void VChart_Scatter1::paintGL()
                     glDrawArrays( GL_LINE_STRIP, j * Reso, Reso );
                 }
             }
-            tChannel->Groups()->at(i)->Opacity =  1.0 - (double)age / (double)tChannel->FadeDuration();
+            if( tChannel->FadeDuration() > 0 )
+                tChannel->Groups()->at(i)->Opacity =  1.0 - (double)age / (double)tChannel->FadeDuration();
         }
     }
 

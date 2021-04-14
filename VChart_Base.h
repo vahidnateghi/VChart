@@ -13,8 +13,8 @@
 #include "VChartDefines.h"
 #include "Channels/Channel_Base.h"
 
-#define MAX_VALUE 999999999999999999
-#define MIN_VALUE -999999999999999999
+#define MAX_VALUE 9999999999999
+#define MIN_VALUE -999999999999
 #define MAX_DEPTH 10.0
 
 class VChart_Base : public QGLWidget, protected QOpenGLFunctions_3_0
@@ -53,6 +53,8 @@ public:
     void setZoomType(const Enum_ZoomType &ZoomType);
 
     void                    SetDefaultBoundaries(double left, double right, double bottom, double top);
+    void                    setAxisXRange( double left, double right );
+    void                    setAxisYRange(double bot, double top );
     void                    SetRestrictions(bool LeftEn, double Left,
                                             bool RightEn, double Right,
                                             bool BotEn, double Bot,
@@ -160,8 +162,8 @@ protected:
     void                    mouseDoubleClickEvent(QMouseEvent *);
     void                    wheelEvent(QWheelEvent *);
 
-    void                    setBoundaries();
     void                    setBoundaries(double left, double right, double bottom, double top);
+    void                    setBoundaries();
     void                    ForceUpdate();
     void                    CheckRestrictions();
 
@@ -178,6 +180,7 @@ private slots:
 
 signals:
     void SgTrackedClick(QPointF);
+    void SgBoundariesChanged(double, double, double, double);
 
 };
 
