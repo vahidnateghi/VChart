@@ -53,6 +53,8 @@ public:
     void setZoomType(const Enum_ZoomType &ZoomType);
 
     void                    SetDefaultBoundaries(double left, double right, double bottom, double top);
+    void                    GetBoundaries( double& left, double& right, double& bottom, double& top );
+    void                    setBoundaries(double left, double right, double bottom, double top);
     void                    setAxisXRange( double left, double right );
     void                    setAxisYRange(double bot, double top );
     void                    SetRestrictions(bool LeftEn, double Left,
@@ -60,8 +62,9 @@ public:
                                             bool BotEn, double Bot,
                                             bool TopEn, double Top);
 
-    void                    TryUpdate();
+    void                    TryUpdate( bool CheckAutoZoom = true);
     virtual void            Clear();
+    void                    DoDefaultZoom();
 
     double MinYSpan() const;
     void setMinYSpan(double MinYSpan);
@@ -162,7 +165,7 @@ protected:
     void                    mouseDoubleClickEvent(QMouseEvent *);
     void                    wheelEvent(QWheelEvent *);
 
-    void                    setBoundaries(double left, double right, double bottom, double top);
+
     void                    setBoundaries();
     void                    ForceUpdate();
     void                    CheckRestrictions();
@@ -181,6 +184,8 @@ private slots:
 signals:
     void SgTrackedClick(QPointF);
     void SgBoundariesChanged(double, double, double, double);
+    void SgRectangularZoomed(double, double, double, double);
+    void SgAutoZoomedDefault();
 
 };
 

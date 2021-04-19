@@ -237,6 +237,16 @@ void VChart_Base::SetDefaultBoundaries(double left, double right, double bottom,
 
 /////////////////////////
 
+void VChart_Base::GetBoundaries(double &left, double &right, double &bottom, double &top)
+{
+    left = m_BoundaryLeft;
+    right = m_BoundaryRight;
+    bottom = m_BoundaryBottom;
+    top = m_BoundaryTop;
+}
+
+/////////////////////////
+
 void VChart_Base::setAxisXRange(double left, double right)
 {
     m_BoundaryLeft = left;
@@ -353,7 +363,7 @@ void VChart_Base::mouseMoveEvent(QMouseEvent *e)
         m_MousePanBasePos = e->pos();
     }
 
-    TryUpdate( );
+    TryUpdate( false );
 }
 
 /////////////////////////
@@ -423,6 +433,7 @@ void VChart_Base::mouseReleaseEvent(QMouseEvent *e)
                 m_BoundaryTop = m_BoundaryBottom + m_MinYSpan;
             }
 
+            emit SgRectangularZoomed( m_BoundaryLeft, m_BoundaryRight, m_BoundaryBottom, m_BoundaryTop );
             setBoundaries();
         }
     }
@@ -463,9 +474,8 @@ void VChart_Base::mouseDoubleClickEvent(QMouseEvent *e)
     {
         if( m_AutoZoomType == AutoZoom_Default )
         {
-            setBoundaries(m_BoundaryLeftDefault, m_BoundaryRightDefault, m_BoundaryBottomDefault, m_BoundaryTopDefault);
-            if( m_ScopeMode == SMode_Polar )
-                resizeGL( width(), height() );
+            DoDefaultZoom();
+            emit SgAutoZoomedDefault();
         }
         else if( m_AutoZoomType == AutoZoom_Calculated )
         {
@@ -562,16 +572,9 @@ void VChart_Base::setBoundaries(double left, double right, double bottom, double
 
 /////////////////////////
 
-void VChart_Base::TryUpdate()
+void VChart_Base::TryUpdate(bool CheckAutoZoom)
 {
-    if( m_RenderETimer.elapsed() > m_UpdateInterval )
-    {
-        m_RenderETimer.restart();
-        updateGL();
-    }
-
-
-    if( m_AutoZoomETimer.elapsed() > m_AutoZoomInterval && ( m_AutoZoomType == AutoZoom_PeriodicCalculated || m_AutoZoomType == AutoZoom_Calculated ) )
+    if( CheckAutoZoom && m_AutoZoomETimer.elapsed() > m_AutoZoomInterval && ( m_AutoZoomType == AutoZoom_PeriodicCalculated || m_AutoZoomType == AutoZoom_Calculated ) )
     {
         m_AutoZoomETimer.restart();
         if( m_AutoZoomMaxX  > (double)MIN_VALUE &&
@@ -585,7 +588,6 @@ void VChart_Base::TryUpdate()
                 double YSpacing = m_AutoZoomMaxY - m_AutoZoomMinY;
                 setBoundaries( m_AutoZoomMinX - XSpacing / 10.0 , m_AutoZoomMaxX + XSpacing / 10.0,
                                m_AutoZoomMinY - YSpacing / 10.0, m_AutoZoomMaxY + YSpacing / 10.0 );
-                emit SgBoundariesChanged( m_BoundaryLeft, m_BoundaryRight, m_BoundaryBottom, m_BoundaryTop );
             }
         }
 
@@ -594,7 +596,18 @@ void VChart_Base::TryUpdate()
         m_AutoZoomMaxY                          = (double)MIN_VALUE;
         m_AutoZoomMinY                          = (double)MAX_VALUE;
     }
+
+
+    if( m_RenderETimer.elapsed() > m_UpdateInterval )
+    {
+        m_RenderETimer.restart();
+        updateGL();
+    }
+
+
 }
+
+/////////////////////////
 
 void VChart_Base::Clear()
 {
@@ -602,6 +615,13 @@ void VChart_Base::Clear()
     m_AutoZoomMinX                          = std::numeric_limits<double>::max();
     m_AutoZoomMaxY                          = std::numeric_limits<double>::min();
     m_AutoZoomMinY                          = std::numeric_limits<double>::max();
+}
+
+void VChart_Base::DoDefaultZoom()
+{
+    setBoundaries(m_BoundaryLeftDefault, m_BoundaryRightDefault, m_BoundaryBottomDefault, m_BoundaryTopDefault);
+    if( m_ScopeMode == SMode_Polar )
+        resizeGL( width(), height() );
 }
 
 double VChart_Base::MinYSpan() const
@@ -800,6 +820,7 @@ void VChart_Base::DoBackGrnPaitings()
     if(m_ShowGridLines)
     {
         glLineStipple(1, 0x5555);
+        glLineWidth( 1.0 );
         glEnable(GL_LINE_STIPPLE);
         glColor4d( m_GridColor.redF(), m_GridColor.greenF(), m_GridColor.blueF(), 0.5 );
 
@@ -989,7 +1010,7 @@ void VChart_Base::SltPrMsgTimerTimeout()
 {
     double Minus =  (double)m_InfoMaxAgeMS / m_MsgTimer->interval();
     m_InforAlpha -= ( 1.0 / Minus );
-    TryUpdate( );
+    TryUpdate( false );
     if( m_InforAlpha <= 0 )
     {
         m_InforAlpha = 0.0;

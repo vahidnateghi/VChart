@@ -62,6 +62,11 @@ enum ScopeMode
     SMode_Undefined
 };
 
+enum Enum_Orientation
+{
+    Orien_Horizontal,
+    Orien_Verical
+};
 
 struct vVertex
 {
@@ -114,5 +119,7 @@ public:
         StartTime = QDateTime::currentDateTime();
     }
 };
+
+
 
 #endif // VCHARTDEFINES_H
