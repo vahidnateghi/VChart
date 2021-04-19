@@ -34,6 +34,9 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
     m_GridColor                             = Qt::white;
     m_GridLabelColor                        = Qt::cyan;
 
+    m_AxisStyleX                            = AxisStyle_Near;
+    m_AxisStyleY                            = AxisStyle_Near;
+
     m_ZoomType                              = ZoomType_WheelAndSquare;
     m_ScopeMode                             = SMode_Undefined;
 
@@ -294,6 +297,12 @@ void VChart_Base::initializeGL()
 //    glDepthMask(GL_TRUE);
 //    glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 10.0f);
+
+    // ?
+//    QGLFormat format = this->format();
+//    format.setSamples( 8 );
+//    setFormat( format );
+//    glEnable( GL_MULTISAMPLE );
 }
 
 /////////////////////////
@@ -751,6 +760,14 @@ void VChart_Base::setInfoMaxAgeMS(int InfoMaxAgeMS)
 
 /////////////////////////
 
+void VChart_Base::setAxisStyle(const Enum_AxisStyle &AxisStyleX, const Enum_AxisStyle &AxisStyleY)
+{
+    m_AxisStyleX = AxisStyleX;
+    m_AxisStyleY = AxisStyleY;
+}
+
+/////////////////////////
+
 void VChart_Base::ForceUpdate()
 {
     updateGL();
@@ -814,8 +831,33 @@ void VChart_Base::DoBackGrnPaitings()
     glClear( GL_COLOR_BUFFER_BIT );
     glClear( GL_DEPTH_BUFFER_BIT );
 
-    double horStep = ( m_BoundaryRight - m_BoundaryLeft ) / (HOR_GRID_CNT+1);
-    double verStep = ( m_BoundaryTop - m_BoundaryBottom ) / (VER_GRID_CNT+1);
+    double horDiff = m_BoundaryRight - m_BoundaryLeft;
+    double verDiff = m_BoundaryTop - m_BoundaryBottom;
+
+    double HorGapMult = 0.1;
+    double VerGapMult = 0.2;
+
+    double horStep = 0.0;
+    double verStep = 0.0;
+
+    if( m_AxisStyleX == AxisStyle_Near )
+        VerGapMult = 0.0;
+    else if( m_AxisStyleX == AxisStyle_Far )
+        VerGapMult = 0.1;
+    if( m_AxisStyleY ==  AxisStyle_Near )
+        HorGapMult = 0.0;
+    else if( m_AxisStyleY ==  AxisStyle_Far )
+        HorGapMult = 0.1;
+
+    if( m_AxisStyleX == AxisStyle_Near )
+        verStep = ( m_BoundaryTop - m_BoundaryBottom ) / (VER_GRID_CNT+1);
+    else if( m_AxisStyleX == AxisStyle_Far )
+        verStep = ( verDiff - ( ( verDiff ) * VerGapMult ) ) / (VER_GRID_CNT+1);
+
+    if( m_AxisStyleY == AxisStyle_Near )
+        horStep = ( m_BoundaryRight - m_BoundaryLeft ) / (HOR_GRID_CNT+1);
+    else if( m_AxisStyleY == AxisStyle_Far )
+        horStep = ( horDiff - ( ( horDiff ) * HorGapMult ) ) / (HOR_GRID_CNT+1);
 
     if(m_ShowGridLines)
     {
@@ -824,50 +866,110 @@ void VChart_Base::DoBackGrnPaitings()
         glEnable(GL_LINE_STIPPLE);
         glColor4d( m_GridColor.redF(), m_GridColor.greenF(), m_GridColor.blueF(), 0.5 );
 
-        for( int i = 1; i < HOR_GRID_CNT+ 1; i++ )
+        if( m_AxisStyleX == AxisStyle_Near )
         {
-            glBegin(GL_LINES);
-            glVertex3d(m_BoundaryLeft + horStep * i, m_BoundaryBottom, 0);
-            glVertex3d(m_BoundaryLeft + horStep * i, m_BoundaryTop, 0);
-            glEnd();
+            for( int i = 0; i < HOR_GRID_CNT+ 1; i++ )
+            {
+                glBegin(GL_LINES);
+                glVertex3d(m_BoundaryLeft + horStep * i + horDiff * HorGapMult, m_BoundaryBottom + verDiff * VerGapMult, 0);
+                glVertex3d(m_BoundaryLeft + horStep * i + horDiff * HorGapMult, m_BoundaryTop + verDiff * VerGapMult, 0);
+                glEnd();
+            }
         }
-
-        for( int i = 1; i < VER_GRID_CNT + 1; i++ )
+        else if( m_AxisStyleX == AxisStyle_Far )
         {
-            glBegin(GL_LINES);
-            glVertex3d(m_BoundaryLeft  , m_BoundaryBottom + verStep * i, 0);
-            glVertex3d(m_BoundaryRight , m_BoundaryBottom + verStep * i, 0);
-            glEnd();
+            for( int i = 0; i < HOR_GRID_CNT + 1; i++ )
+            {
+                glBegin(GL_LINES);
+                glVertex3d( m_BoundaryLeft + horStep * i + horDiff * HorGapMult, m_BoundaryBottom + verDiff * VerGapMult, 0);
+                glVertex3d( m_BoundaryLeft + horStep * i + horDiff * HorGapMult, m_BoundaryBottom + VER_GRID_CNT * verStep + verDiff * VerGapMult, 0);
+                glEnd();
+            }
+        }
+        if( m_AxisStyleY == AxisStyle_Near )
+        {
+            for( int i = 0; i < VER_GRID_CNT + 1; i++ )
+            {
+                glBegin(GL_LINES);
+                glVertex3d(m_BoundaryLeft + horDiff * HorGapMult , m_BoundaryBottom + verStep * i + verDiff * VerGapMult, 0);
+                glVertex3d(m_BoundaryRight + horDiff * HorGapMult , m_BoundaryBottom + verStep * i + verDiff * VerGapMult, 0);
+                glEnd();
+            }
+        }
+        else if( m_AxisStyleY == AxisStyle_Far )
+        {
+            for( int i = 0; i < VER_GRID_CNT + 1; i++ )
+            {
+                glBegin(GL_LINES);
+                glVertex3d(m_BoundaryLeft + horDiff * HorGapMult, m_BoundaryBottom + verStep * i + verDiff * VerGapMult, 0);
+                glVertex3d(m_BoundaryLeft + horStep * HOR_GRID_CNT + horDiff * HorGapMult, m_BoundaryBottom + verStep * i + verDiff * VerGapMult, 0);
+                glEnd();
+            }
         }
         glDisable(GL_LINE_STIPPLE);
     }
+
     if(m_ShowGridLabelsX)
     {
-        glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
-        QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
-        QFont font = m_GridLabelFont;
-        for( int i = 1; i < HOR_GRID_CNT+ 1; i++ )
+        if( m_AxisStyleX == AxisStyle_Near )
         {
-            QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + horStep*i, m_BoundaryTop - posRatio.y()));
-            renderText( lPos.x(),
-                        lPos.y(),
-                        QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumber),
-                        font);
+            glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
+            QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
+            QFont font = m_GridLabelFont;
+            for( int i = 1; i < HOR_GRID_CNT+ 1; i++ )
+            {
+                QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + horStep*i, m_BoundaryTop - posRatio.y()));
+                renderText( lPos.x(),
+                            lPos.y(),
+                            QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumber),
+                            font);
+            }
+        }
+        else if( m_AxisStyleX == AxisStyle_Far )
+        {
+            glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
+            QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
+            QFont font = m_GridLabelFont;
+            for( int i = 0; i < HOR_GRID_CNT; i++ )
+            {
+                QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + horStep*i + horDiff * 0.1, m_BoundaryTop - posRatio.y()));
+                renderText( lPos.x() - 25,
+                            lPos.y() + 9,
+                            QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumber),
+                            font);
+            }
         }
     }
 
     if( m_ShowGridLabelsY )
     {
-        glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
-        QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
-        QFont font = m_GridLabelFont;
-        for( int i = 1; i < VER_GRID_CNT+ 1; i++ )
+        if( m_AxisStyleY == AxisStyle_Near )
         {
-            QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));
-            renderText( lPos.x(),
-                        height() - lPos.y(),
-                        QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumber),
-                        font);
+            glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
+            QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
+            QFont font = m_GridLabelFont;
+            for( int i = 1; i < VER_GRID_CNT+ 1; i++ )
+            {
+                QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));
+                renderText( lPos.x(),
+                            height() - lPos.y(),
+                            QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumber),
+                            font);
+            }
+        }
+        else if( m_AxisStyleY == AxisStyle_Far )
+        {
+            glColor3d( m_GridLabelColor.redF(), m_GridLabelColor.greenF(), m_GridLabelColor.blueF() );
+            QPointF posRatio = mouseToScopeRatio(QPointF(5, 10));
+            QFont font = m_GridLabelFont;
+            for( int i = 1; i < VER_GRID_CNT+ 1; i++ )
+            {
+                QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));
+                renderText( lPos.x(),
+                            height() - lPos.y(),
+                            QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumber),
+                            font);
+            }
         }
     }
 }

@@ -18,8 +18,8 @@ public:
             double LineSize = 1,
             bool ShowPoints = false);
 
-
     void Clear();
+
 };
 
 #endif // VCHART_XY_H

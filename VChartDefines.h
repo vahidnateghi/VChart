@@ -68,6 +68,12 @@ enum Enum_Orientation
     Orien_Verical
 };
 
+enum Enum_AxisStyle
+{
+    AxisStyle_Near,
+    AxisStyle_Far
+};
+
 struct vVertex
 {
     double x;

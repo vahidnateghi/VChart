@@ -97,6 +97,8 @@ public:
     int InfoMaxAgeMS() const;
     void setInfoMaxAgeMS(int InfoMaxAgeMS);
 
+    void setAxisStyle(const Enum_AxisStyle &AxisStyleX, const Enum_AxisStyle &AxisStyleY);
+
 protected:
     QElapsedTimer           m_RenderETimer;
     QElapsedTimer           m_AutoZoomETimer;
@@ -153,6 +155,8 @@ protected:
     Enum_ZoomType           m_ZoomType;
     bool                    m_TrackClick;
     ScopeMode               m_ScopeMode;
+    Enum_AxisStyle          m_AxisStyleX;
+    Enum_AxisStyle          m_AxisStyleY;
 
 
     virtual void            initializeGL();
