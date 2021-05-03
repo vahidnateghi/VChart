@@ -78,10 +78,11 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
         {
             for( int j = 0; j < tChnl->BarCount(); j++ )
             {
-                if( Points.at(i).y() < qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
+                if( Points.at(i).y() <= qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
                     Points.at(i).y() >= qMax( Min, Min + ( SectionStep * j - SectionStep / 2.0 ) ))
                 {
                     tChnl->LineLength()->replace( j, tChnl->LineLength()->at(j) + m_HistStep );
+                    break;
                 }
             }
         }
@@ -89,10 +90,11 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
         {
             for( int j = 0; j < tChnl->BarCount(); j++ )
             {
-                if( Points.at(i).x() < qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
+                if( Points.at(i).x() <= qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
                     Points.at(i).x() >= qMax( Min, Min - ( SectionStep * j - SectionStep / 2.0 ) ))
                 {
                     tChnl->LineLength()->replace( j, tChnl->LineLength()->at(j) + m_HistStep );
+                    break;
                 }
             }
         }

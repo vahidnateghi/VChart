@@ -629,7 +629,9 @@ void VChart_Base::wheelEvent(QWheelEvent *e)
 
         CheckRestrictions();
 
-        resizeGL( width(), height() );
+        setBoundaries( true, true  );
+
+//        resizeGL( width(), height() );
     }
 }
 

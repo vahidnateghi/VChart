@@ -6,6 +6,7 @@
 class VChart_Line1 : public VChart_Line
 {
     Q_OBJECT
+    Q_PROPERTY(int TestProp)
 public:
     explicit VChart_Line1(QWidget *parent = nullptr);
 
