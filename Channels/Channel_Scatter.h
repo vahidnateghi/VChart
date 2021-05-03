@@ -29,6 +29,8 @@ public:
     QVector<QString> Labels() const;
     void setLabels(const QVector<QString> &Labels);
 
+    void Clear();
+
 private:
     Enum_PointShape m_PointShape;
     int m_FadeDuration;

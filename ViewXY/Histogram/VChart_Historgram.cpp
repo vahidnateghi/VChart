@@ -24,7 +24,7 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
         return;
 
     Channel_Bar* tChnl = (Channel_Bar *)m_Channels.at(ChnlIdx);
-    double Min = 10000000, Max = -10000000;
+    double Min = 100000000000000, Max = -100000000000000;
 
     // Finding Max and Min
     double SectionStep = 1.0;
@@ -104,19 +104,26 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
 
     if( tChnl->Orientation() == Orien_Horizontal )
     {
-        m_AutoZoomMinX = 0.1 * maxLen;
+        m_AutoZoomMinX = 0.0;//-0.1 * maxLen;
         m_AutoZoomMaxX = maxLen;
-        m_AutoZoomMinY = Min - qAbs(Max - Min) * 0.1;
-        m_AutoZoomMaxY = Max + qAbs(Max - Min) * 0.1;
+        if( m_AutoZoomYType == AutoZoom_PeriodicCalculated )
+        {
+            m_AutoZoomMinY = Min;
+            m_AutoZoomMaxY = Max;
+        }
 
     }
     else if( tChnl->Orientation() == Orien_Verical )
     {
-        m_AutoZoomMinX = Min - qAbs(Max - Min) * 0.1;
-        m_AutoZoomMaxX = Max + qAbs(Max - Min) * 0.1;
+        if( m_AutoZoomXType == AutoZoom_PeriodicCalculated )
+        {
+            m_AutoZoomMinX = Min - qAbs(Max - Min) / m_AutoZoomXCoef;
+            m_AutoZoomMaxX = Max + qAbs(Max - Min) / m_AutoZoomXCoef;
+        }
         m_AutoZoomMinY = 0.1 * maxLen;
         m_AutoZoomMaxY = maxLen + maxLen * 0.1;
     }
+
 
     if( update )
     {

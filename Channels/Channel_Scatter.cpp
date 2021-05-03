@@ -55,6 +55,14 @@ void Channel_Scatter::setLabels(const QVector<QString> &Labels)
     m_Labels = Labels;
 }
 
+void Channel_Scatter::Clear()
+{
+    for( int i = 0; i < m_Groups->count(); i++ )
+        delete m_Groups->at(i);
+
+    m_Groups->clear();
+}
+
 void Channel_Scatter::setPointShape(const Enum_PointShape &PointShape)
 {
     m_PointShape = PointShape;

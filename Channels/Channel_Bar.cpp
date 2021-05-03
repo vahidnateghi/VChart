@@ -38,6 +38,12 @@ int Channel_Bar::BarCount() const
 void Channel_Bar::setBarCount(int BarCount)
 {
     m_BarCount = BarCount;
+    m_LineStarts->clear();
+    for( int i = 0; i < m_BarCount; i++ )
+        m_LineStarts->append( QPointF( 0, 0 ) );
+    m_LineLength->clear();
+    for( int i = 0; i < m_BarCount; i++ )
+        m_LineLength->append( 0 );
 }
 
 Enum_Orientation Channel_Bar::Orientation() const

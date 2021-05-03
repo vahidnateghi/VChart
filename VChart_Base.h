@@ -10,6 +10,8 @@
 #include <QPointF>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QPair>
+#include <QList>
 #include "VChartDefines.h"
 #include "Channels/Channel_Base.h"
 
@@ -46,25 +48,31 @@ public:
 
     void AdjustAsceptRatio();
 
-    Enum_AutoZoomType AutoZoomType() const;
-    void setAutoZoomType(const Enum_AutoZoomType &AutoZoomType);
+    Enum_AutoZoomType AutoZoomXType() const;
+    void setAutoZoomType(const Enum_AutoZoomType &AutoZoomXType, const Enum_AutoZoomType &AutoZoomYType);
 
     Enum_ZoomType ZoomType() const;
     void setZoomType(const Enum_ZoomType &ZoomType);
 
     void                    SetDefaultBoundaries(double left, double right, double bottom, double top);
     void                    GetBoundaries( double& left, double& right, double& bottom, double& top );
-    void                    setBoundaries(double left, double right, double bottom, double top);
-    void                    setAxisXRange( double left, double right );
-    void                    setAxisYRange(double bot, double top );
+    void                    setBoundaries(double left, double right, double bottom, double top, bool SendSignal = true, bool Update = true);
+    void                    setAxisXRange( double left, double right, bool Update = true );
+    void                    setAxisYRange(double bot, double top , bool Update = true);
     void                    SetRestrictions(bool LeftEn, double Left,
                                             bool RightEn, double Right,
                                             bool BotEn, double Bot,
                                             bool TopEn, double Top);
+    void                    DoAutoZoom( bool Update = true );
 
     void                    TryUpdate( bool CheckAutoZoom = true);
+    void                    ForceUpdate();
     virtual void            Clear();
-    void                    DoDefaultZoom();
+    virtual void            Clear( int Idx );
+    void                    DoDefaultZoom(bool SendSignal = true, bool Update = true);
+
+    void AddLabel(QPointF pnt, QString lbl);
+    void ClearLabels();
 
     double MinYSpan() const;
     void setMinYSpan(double MinYSpan);
@@ -79,6 +87,7 @@ public:
     void setInfoType(const MsgType &InfoType);
 
     void TrackMyClick();
+    void StopTrackingMyClick();
 
     QColor GridColor() const;
     void setGridColor(const QColor &GridColor);
@@ -98,6 +107,15 @@ public:
     void setInfoMaxAgeMS(int InfoMaxAgeMS);
 
     void setAxisStyle(const Enum_AxisStyle &AxisStyleX, const Enum_AxisStyle &AxisStyleY);
+
+    bool ShowLabels() const;
+    void setShowLabels(bool ShowLabels);
+
+    double AutoZoomXCoef() const;
+    void setAutoZoomXCoef(double AutoZoomXCoef);
+
+    double AutoZoomYCoef() const;
+    void setAutoZoomYCoef(double AutoZoomYCoef);
 
 protected:
     QElapsedTimer           m_RenderETimer;
@@ -151,12 +169,18 @@ protected:
     QString                 m_YScale;
     QString                 m_Message;
     QVector<Channel_Base *> m_Channels;
-    Enum_AutoZoomType       m_AutoZoomType;
+    Enum_AutoZoomType       m_AutoZoomXType;
+    Enum_AutoZoomType       m_AutoZoomYType;
     Enum_ZoomType           m_ZoomType;
     bool                    m_TrackClick;
     ScopeMode               m_ScopeMode;
     Enum_AxisStyle          m_AxisStyleX;
     Enum_AxisStyle          m_AxisStyleY;
+    double                  m_AutoZoomXCoef;
+    double                  m_AutoZoomYCoef;
+
+    QList<QPair<QPointF, QString>> m_Labels;
+    bool                    m_ShowLabels;
 
 
     virtual void            initializeGL();
@@ -169,9 +193,7 @@ protected:
     void                    mouseDoubleClickEvent(QMouseEvent *);
     void                    wheelEvent(QWheelEvent *);
 
-
-    void                    setBoundaries();
-    void                    ForceUpdate();
+    void                    setBoundaries(bool SendSignal = true, bool Update = true);
     void                    CheckRestrictions();
 
     virtual void                    DoBackGrnPaitings();
@@ -186,7 +208,7 @@ private slots:
     void                    SltPrMsgTimerTimeout();
 
 signals:
-    void SgTrackedClick(QPointF);
+    void SgTrackedClick(QList<QList<QPointF>>);
     void SgBoundariesChanged(double, double, double, double);
     void SgRectangularZoomed(double, double, double, double);
     void SgAutoZoomedDefault();
