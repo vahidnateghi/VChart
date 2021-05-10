@@ -83,6 +83,7 @@ struct vVertex
     double g;
     double b;
     double a;
+    double val;
 
 public:
     vVertex(double x = 0.0, double y = 0.0, double z = 0.0)
@@ -95,6 +96,7 @@ public:
         this->g = 0.0;
         this->b = 1.0;
         this->a = 1.0;
+        this->val = 0.0;
     }
 
     vVertex(double x, double y, double z, double r, double g, double b, double a)
@@ -107,6 +109,7 @@ public:
         this->g = g;
         this->b = b;
         this->a = a;
+        this->val = 0.0;
     }
 };
 

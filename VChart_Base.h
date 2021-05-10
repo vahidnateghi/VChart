@@ -22,8 +22,6 @@
 class VChart_Base : public QGLWidget, protected QOpenGLFunctions_3_0
 {
     Q_OBJECT
-    Q_PROPERTY(int IntervalOfUpdate READ UpdateInterval WRITE setUpdateInterval)
-
 public:
     explicit VChart_Base(QWidget *parent = nullptr);
 
