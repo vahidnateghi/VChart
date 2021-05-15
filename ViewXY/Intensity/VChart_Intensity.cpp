@@ -77,64 +77,65 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
     if( YIdx == 0 )
     {
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
-        vVertex * Ptr1 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 
-        if( Ptr1 != NULL )
-        {
-            Ptr1[2 * XIdx].val = Val;
-            Ptr1[2 * XIdx].r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr1[2 * XIdx].g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr1[2 * XIdx].b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr1[2 * XIdx].a = 1.0;
-        }
+        vVertex NewV;
+        NewV.x = tChannel->StartX() + tChannel->StepX() * XIdx;
+        NewV.y = tChannel->StartY() + tChannel->StepY() * YIdx;
+        NewV.z = 0.0;
+        NewV.val = Val;
+        NewV.r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV.g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV.a = 1.0;
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * 2 * XIdx, sizeof(vVertex), &NewV );
     }
     else if( YIdx == tChannel->YReso() - 1 )
     {
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx - 1] );
-        vVertex * Ptr0 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 
-        if( Ptr0 != NULL )
-        {
-            Ptr0[2 * XIdx + 1].val = Val;
-            Ptr0[2 * XIdx + 1].r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr0[2 * XIdx + 1].g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr0[2 * XIdx + 1].b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr0[2 * XIdx + 1].a = 1.0;
-        }
+        vVertex NewV;
+        NewV.x = tChannel->StartX() + tChannel->StepX() * XIdx;
+        NewV.y = tChannel->StartY() + tChannel->StepY() * ( YIdx + 1 );
+        NewV.z = 0.0;
+        NewV.val = Val;
+        NewV.r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV.g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV.a = 1.0;
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &NewV );
     }
     else
     {
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx - 1] );
-        vVertex * Ptr0 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 
-        if( Ptr0 != NULL )
-        {
-            Ptr0[2 * XIdx + 1].val = Val;
-            Ptr0[2 * XIdx + 1].r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr0[2 * XIdx + 1].g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr0[2 * XIdx + 1].b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr0[2 * XIdx + 1].a = 1.0;
-        }
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
+        vVertex NewV1;
+        NewV1.x = tChannel->StartX() + tChannel->StepX() * XIdx;
+        NewV1.y = tChannel->StartY() + tChannel->StepY() * ( YIdx + 1 );
+        NewV1.z = 0.0;
+        NewV1.val = Val;
+        NewV1.r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV1.g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV1.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV1.a = 1.0;
+
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &NewV1 );
 
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
-        vVertex * Ptr1 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 
-        if( Ptr1 != NULL )
-        {
-            Ptr1[2 * XIdx].val = Val;
-            Ptr1[2 * XIdx].r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr1[2 * XIdx].g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr1[2 * XIdx].b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-            Ptr1[2 * XIdx].a = 1.0;
-        }
+        vVertex NewV2;
+        NewV2.x = tChannel->StartX() + tChannel->StepX() * XIdx;
+        NewV2.y = tChannel->StartY() + tChannel->StepY() * YIdx;
+        NewV2.z = 0.0;
+        NewV2.val = Val;
+        NewV2.r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV2.g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV2.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV2.a = 1.0;
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
+        glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx ), sizeof(vVertex), &NewV2 );
     }
 }
 
@@ -154,52 +155,40 @@ double VChart_Intensity::GetValue(int Idx, int XIdx, int YIdx)
 
     Channel_Intensity* tChannel = (Channel_Intensity*)m_Channels.at(Idx);
     double retVal = 0.0;
+    vVertex retVertex;
 
     if( YIdx == 0 )
     {
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
-        vVertex * Ptr1 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glGetBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx ), sizeof(vVertex), &retVertex );
 
-        if( Ptr1 != NULL )
-        {
-            retVal = Ptr1[2 * XIdx].val;
-        }
+        retVal = retVertex.val;
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
     else if( YIdx == tChannel->YReso() - 1 )
     {
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
-        vVertex * Ptr0 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glGetBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &retVertex );
 
-        if( Ptr0 != NULL )
-        {
-            retVal = Ptr0[2 * XIdx + 1].val;
-        }
-
-        glUnmapBuffer( GL_ARRAY_BUFFER );
+        retVal = retVertex.val;
     }
     else
     {
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
-        vVertex * Ptr0 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+        glGetBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &retVertex );
 
-        if( Ptr0 != NULL )
-        {
-            retVal = Ptr0[2 * XIdx + 1].val;
-        }
+        retVal = retVertex.val;
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
 
-        glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
-        vVertex * Ptr1 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+//        glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
+//        vVertex * Ptr1 = (vVertex *)glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
 
-        if( Ptr1 != NULL )
-        {
-            retVal = Ptr1[2 * XIdx].val;
-        }
+//        if( Ptr1 != NULL )
+//        {
+//            retVal = Ptr1[2 * XIdx].val;
+//        }
 
-        glUnmapBuffer( GL_ARRAY_BUFFER );
+//        glUnmapBuffer( GL_ARRAY_BUFFER );
     }
 
     return retVal;

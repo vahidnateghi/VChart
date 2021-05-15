@@ -357,7 +357,7 @@ void VChart_Base::initializeGL()
 //    QGLFormat format = this->format();
 //    format.setSamples( 8 );
 //    setFormat( format );
-//    glEnable( GL_MULTISAMPLE );
+    glEnable( GL_MULTISAMPLE );
 }
 
 /////////////////////////
