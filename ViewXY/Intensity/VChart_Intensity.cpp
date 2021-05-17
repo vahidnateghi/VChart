@@ -19,6 +19,7 @@ void VChart_Intensity::AddChannel(QString Title, double StartX, double StopX, do
     tChannel->setTitle( Title );
 
     tChannel->m_ValuePoints.resize( tChannel->YReso() - 1 );
+    makeCurrent();
     glGenBuffers( tChannel->YReso() - 1, tChannel->m_ValuePoints.data() );
 
     for( int i = 0; i < tChannel->YReso() - 1; i++ )
@@ -46,6 +47,7 @@ void VChart_Intensity::AddChannel(QString Title, double StartX, double StopX, do
             Row[2 * j + 1].val = tChannel->MinVal();
         }
 
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.at(i) );
         glBufferData( GL_ARRAY_BUFFER, sizeof(vVertex) * 2 * tChannel->XReso(), Row, GL_STATIC_DRAW );
     }
@@ -76,6 +78,7 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
 
     if( YIdx == 0 )
     {
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
 
         vVertex NewV;
@@ -88,10 +91,12 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
         NewV.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
         NewV.a = 1.0;
 
+        makeCurrent();
         glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * 2 * XIdx, sizeof(vVertex), &NewV );
     }
     else if( YIdx == tChannel->YReso() - 1 )
     {
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx - 1] );
 
         vVertex NewV;
@@ -104,10 +109,12 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
         NewV.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
         NewV.a = 1.0;
 
+        makeCurrent();
         glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &NewV );
     }
     else
     {
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx - 1] );
 
 
@@ -121,6 +128,7 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
         NewV1.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
         NewV1.a = 1.0;
 
+        makeCurrent();
         glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &NewV1 );
 
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
@@ -135,6 +143,7 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
         NewV2.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
         NewV2.a = 1.0;
 
+        makeCurrent();
         glBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx ), sizeof(vVertex), &NewV2 );
     }
 }
@@ -159,6 +168,7 @@ double VChart_Intensity::GetValue(int Idx, int XIdx, int YIdx)
 
     if( YIdx == 0 )
     {
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
         glGetBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx ), sizeof(vVertex), &retVertex );
 
@@ -167,6 +177,7 @@ double VChart_Intensity::GetValue(int Idx, int XIdx, int YIdx)
     }
     else if( YIdx == tChannel->YReso() - 1 )
     {
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
         glGetBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &retVertex );
 
@@ -174,6 +185,7 @@ double VChart_Intensity::GetValue(int Idx, int XIdx, int YIdx)
     }
     else
     {
+        makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.data()[YIdx] );
         glGetBufferSubData( GL_ARRAY_BUFFER, sizeof(vVertex) * ( 2 * XIdx + 1 ), sizeof(vVertex), &retVertex );
 

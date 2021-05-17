@@ -10,8 +10,8 @@ HEADERS +=  \
     $$PWD/Channels/Channel_Scatter.h \
     $$PWD/Channels/Channel_Line.h \
     $$PWD/ViewRadial/VChart_Radial.h \
-    $$PWD/ViewXY/Histogram/VChart_Histogram1.h \
-    $$PWD/ViewXY/Histogram/VChart_Historgram.h \
+    $$PWD/ViewXY/Bar/VChart_Bar.h \
+    $$PWD/ViewXY/Bar/VChart_Bar1.h \
     $$PWD/ViewXY/Intensity/VChart_Intensity.h \
     $$PWD/ViewXY/Intensity/VChart_Intensity1.h \
     $$PWD/ViewXY/VChart_XY.h \
@@ -31,8 +31,8 @@ SOURCES +=  \
     $$PWD/Channels/Channel_Scatter.cpp \
     $$PWD/Channels/Channel_Line.cpp \
     $$PWD/ViewRadial/VChart_Radial.cpp \
-    $$PWD/ViewXY/Histogram/VChart_Histogram1.cpp \
-    $$PWD/ViewXY/Histogram/VChart_Historgram.cpp \
+    $$PWD/ViewXY/Bar/VChart_Bar.cpp \
+    $$PWD/ViewXY/Bar/VChart_Bar1.cpp \
     $$PWD/ViewXY/Intensity/VChart_Intensity.cpp \
     $$PWD/ViewXY/Intensity/VChart_Intensity1.cpp \
     $$PWD/ViewXY/VChart_XY.cpp \
