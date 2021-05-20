@@ -20,6 +20,16 @@ void VChart_Radial::setShowCrossLines(bool ShowCrossLines, QColor CrossLineColor
     m_CrossLineColor = CrossLineColor;
 }
 
+int VChart_Radial::MaxRange() const
+{
+    return m_MaxRange;
+}
+
+void VChart_Radial::setMaxRange(int MaxRange)
+{
+    m_MaxRange = MaxRange;
+}
+
 void VChart_Radial::genCircleBuffer()
 {
     for(int i = 0; i < m_CircleBufferCount; i++)

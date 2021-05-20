@@ -13,6 +13,9 @@ public:
 
     void setShowCrossLines(bool ShowCrossLines, QColor CrossLineColor);
 
+    int MaxRange() const;
+    void setMaxRange(int MaxRange);
+
 protected:
     int                     m_CircleBufferCount;
     int                     m_CircleBufferLength;
