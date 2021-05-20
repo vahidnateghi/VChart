@@ -3,7 +3,7 @@
 
 VChart_Scatter::VChart_Scatter(QWidget *parent) : VChart_XY(parent)
 {
-
+    m_ScopeMode = SMode_Scatter;
 }
 
 /////////////////////////
@@ -37,7 +37,7 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt, bool Update
 
     QPointF tSize = QPointF(tChannel->PointSizeX(), tChannel->PointSizeY());
 
-    if(tChannel->PointShape() == Shape_Bleep)
+    if( tChannel->PointShape() == Shape_Bleep )
     {
         tPntSize = pnt.count() * 6;
         for(int i = 0; i < pnt.count(); i++)
@@ -186,6 +186,19 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &Points, const QV
 
     if( Update )
         TryUpdate();
+}
+
+/////////////////////////
+
+void VChart_Scatter::Clear(int Idx)
+{
+    if( Idx < 0 || Idx >= m_Channels.count() )
+        return;
+
+    Channel_Scatter* tChannel = (Channel_Scatter *)m_Channels[Idx];
+    tChannel->Clear();
+
+    TryUpdate();
 }
 
 /////////////////////////

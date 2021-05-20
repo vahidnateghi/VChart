@@ -1,5 +1,6 @@
 #include "VChart_Base.h"
 #include <QDebug>
+#include "Channels/Channel_Scatter.h"
 
 VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
 {
@@ -63,12 +64,16 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
     m_RestrictionBot                        = -1000;
     m_MinXSpan                              = 1.0;
     m_MinYSpan                              = 1.0;
+    m_ShowLabels                            = false;
+    m_AutoZoomXCoef                         = 15.0;
+    m_AutoZoomYCoef                         = 4.0;
 
     m_GridLabelFont.setFamily( "Calibri" );
     m_GridLabelFont.setWeight( 30 );
     m_GridLabelFont.setPixelSize( 15 );
 
-    m_AutoZoomType                          = AutoZoom_Default;
+    m_AutoZoomXType                          = AutoZoom_Default;
+    m_AutoZoomYType                         = AutoZoom_Default;
 
     m_InfoType                              = MsgType_None;
     m_InfoMaxAgeMS                          = 2000;
@@ -192,21 +197,22 @@ void VChart_Base::AdjustAsceptRatio()
     m_BoundaryLeft = -NewScopeWidth / 2.0;
     m_BoundaryRight = NewScopeWidth / 2.0;
 
-    setBoundaries();
+    setBoundaries( false );
 }
 
 /////////////////////////
 
-Enum_AutoZoomType VChart_Base::AutoZoomType() const
+Enum_AutoZoomType VChart_Base::AutoZoomXType() const
 {
-    return m_AutoZoomType;
+    return m_AutoZoomXType;
 }
 
 /////////////////////////
 
-void VChart_Base::setAutoZoomType(const Enum_AutoZoomType &AutoZoomType)
+void VChart_Base::setAutoZoomType(const Enum_AutoZoomType &AutoZoomXType, const Enum_AutoZoomType &AutoZoomYType)
 {
-    m_AutoZoomType = AutoZoomType;
+    m_AutoZoomXType = AutoZoomXType;
+    m_AutoZoomYType = AutoZoomYType;
 }
 
 /////////////////////////
@@ -250,22 +256,24 @@ void VChart_Base::GetBoundaries(double &left, double &right, double &bottom, dou
 
 /////////////////////////
 
-void VChart_Base::setAxisXRange(double left, double right)
+void VChart_Base::setAxisXRange(double left, double right, bool Update)
 {
     m_BoundaryLeft = left;
     m_BoundaryRight = right;
 
-    setBoundaries();
+    if( Update )
+        setBoundaries( false );
 }
 
 /////////////////////////
 
-void VChart_Base::setAxisYRange(double bot, double top)
+void VChart_Base::setAxisYRange(double bot, double top, bool Update)
 {
     m_BoundaryBottom = bot;
     m_BoundaryTop = top;
 
-    setBoundaries();
+    if( Update )
+        setBoundaries( false );
 }
 
 /////////////////////////
@@ -282,6 +290,52 @@ void VChart_Base::SetRestrictions(bool LeftEn, double Left, bool RightEn, double
     m_RestrictionTop = Top;
 }
 
+/////////////////////////
+
+void VChart_Base::DoAutoZoom(bool Update)
+{
+    double XSpacing = 1.0;
+    double YSpacing = 1.0;
+    double newLeft = m_BoundaryLeft, newRight = m_BoundaryRight, newBottom = m_BoundaryBottom, newTop = m_BoundaryTop;
+
+    if( ( m_AutoZoomXType == AutoZoom_PeriodicCalculated ) && ( m_AutoZoomXType == AutoZoom_PeriodicCalculated || m_AutoZoomXType == AutoZoom_Calculated ) )
+    {
+        if( m_AutoZoomMaxX  > (double)MIN_VALUE &&
+            m_AutoZoomMinX  < (double)MAX_VALUE )
+        {
+            XSpacing = m_AutoZoomMaxX - m_AutoZoomMinX;
+
+            newLeft = m_AutoZoomMinX - XSpacing / m_AutoZoomXCoef;
+            newRight = m_AutoZoomMaxX + XSpacing / m_AutoZoomXCoef;
+
+
+        }
+        m_AutoZoomMaxX                          = (double)MIN_VALUE;
+        m_AutoZoomMinX                          = (double)MAX_VALUE;
+    }
+
+    if( ( m_AutoZoomYType == AutoZoom_PeriodicCalculated ) && ( m_AutoZoomYType == AutoZoom_PeriodicCalculated || m_AutoZoomYType == AutoZoom_Calculated ) )
+    {
+        if( m_AutoZoomMaxY  > (double)MIN_VALUE &&
+            m_AutoZoomMinY  < (double)MAX_VALUE )
+        {
+            YSpacing = m_AutoZoomMaxY - m_AutoZoomMinY;
+
+            newBottom = m_AutoZoomMinY - YSpacing / m_AutoZoomYCoef;
+            newTop = m_AutoZoomMaxY + YSpacing / m_AutoZoomYCoef;
+
+
+        }
+        m_AutoZoomMaxY                          = (double)MIN_VALUE;
+        m_AutoZoomMinY                          = (double)MAX_VALUE;
+    }
+
+    setBoundaries( newLeft , newRight, newBottom, newTop );
+
+    if(Update)
+        TryUpdate();
+}
+
 // /////////////////////// PROTECTED
 
 void VChart_Base::initializeGL()
@@ -289,6 +343,7 @@ void VChart_Base::initializeGL()
     makeCurrent();
     initializeOpenGLFunctions();
     glEnable(GL_POINT_SMOOTH);
+    glEnable( GL_PROGRAM_POINT_SIZE );
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glEnable( GL_COLOR_BUFFER_BIT );
     glEnable( GL_BLEND );
@@ -302,7 +357,7 @@ void VChart_Base::initializeGL()
 //    QGLFormat format = this->format();
 //    format.setSamples( 8 );
 //    setFormat( format );
-//    glEnable( GL_MULTISAMPLE );
+    glEnable( GL_MULTISAMPLE );
 }
 
 /////////////////////////
@@ -312,7 +367,7 @@ void VChart_Base::resizeGL(int w, int h)
     makeCurrent();
 
     glViewport( 0, 0, w, h );
-    setBoundaries( );
+    setBoundaries( false );
 
     update();
 }
@@ -368,7 +423,7 @@ void VChart_Base::mouseMoveEvent(QMouseEvent *e)
             }
         }
 
-        setBoundaries();
+        setBoundaries( true );
         m_MousePanBasePos = e->pos();
     }
 
@@ -401,14 +456,20 @@ void VChart_Base::mouseReleaseEvent(QMouseEvent *e)
         QPointF pos1 = mouseToScopeCoor( m_LastMousePos );
         QPointF pos2 = mouseToScopeCoor( m_MouseBasePos );
 
-        if( m_TrackClick )
-        {
-            m_TrackClick = false;
-            emit SgTrackedClick( pos1 );
-        }
         if( qAbs(pos1.x() - pos2.x()) < (0.01 * qAbs(m_BoundaryRight - m_BoundaryLeft) ) ||
-            qAbs(pos1.y() - pos2.y()) < (0.01 * qAbs(m_BoundaryTop - m_BoundaryBottom)))
+            qAbs(pos1.y() - pos2.y()) < (0.01 * qAbs(m_BoundaryTop - m_BoundaryBottom) ) )
+        {
+            if( m_TrackClick )
+            {
+//                m_TrackClick = false;
+                QList<QList<QPointF>> PntCollec;
+                QList<QPointF> pnts;
+                pnts << pos1;
+                PntCollec << pnts;
+                emit SgTrackedClick( PntCollec );
+            }
             return;
+        }
 
         if( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare )
         {
@@ -419,6 +480,38 @@ void VChart_Base::mouseReleaseEvent(QMouseEvent *e)
 
             double XSpan = newRight - newLeft;
             double YSpan = newTop - newBottom;
+
+            if( m_TrackClick )
+            {
+//                m_TrackClick = false;
+
+                if( m_ScopeMode == SMode_Scatter )
+                {
+                    QList<QList<QPointF>> PntCollect;
+                    for( int i = 0; i < m_Channels.count(); i++ )
+                    {
+                        Channel_Scatter* tChannel = (Channel_Scatter*)m_Channels[i];
+
+                        QList<QPointF> Pnts;
+                        for( int j = 0; j < tChannel->Groups()->count(); j++ )
+                        {
+                            for( int k = 0; k < tChannel->Groups()->at(j)->BasePoints.count(); k++ )
+                            {
+                                QPointF tPnt = tChannel->Groups()->at(j)->BasePoints.at(k);
+                                if( tPnt.x() >= newLeft && tPnt.x() <= newRight &&
+                                    tPnt.y() >= newBottom && tPnt.y() <= newTop )
+                                {
+                                    Pnts << tPnt;
+                                }
+                            }
+                        }
+                        PntCollect << Pnts;
+                    }
+
+                    emit SgTrackedClick( PntCollect );
+                    return;
+                }
+            }
 
             if( XSpan >= m_MinXSpan )
             {
@@ -481,12 +574,14 @@ void VChart_Base::mouseDoubleClickEvent(QMouseEvent *e)
 {
     if( e->button() == Qt::LeftButton )
     {
-        if( m_AutoZoomType == AutoZoom_Default )
+        if( m_AutoZoomXType == AutoZoom_Default ||
+            m_AutoZoomYType == AutoZoom_Default)
         {
             DoDefaultZoom();
             emit SgAutoZoomedDefault();
         }
-        else if( m_AutoZoomType == AutoZoom_Calculated )
+        if( m_AutoZoomXType == AutoZoom_Calculated ||
+            m_AutoZoomYType == AutoZoom_Calculated)
         {
             setBoundaries( m_AutoZoomMinX, m_AutoZoomMaxX, m_AutoZoomMinY, m_AutoZoomMaxY );
         }
@@ -534,13 +629,15 @@ void VChart_Base::wheelEvent(QWheelEvent *e)
 
         CheckRestrictions();
 
-        resizeGL( width(), height() );
+        setBoundaries( true, true  );
+
+//        resizeGL( width(), height() );
     }
 }
 
 /////////////////////////
 
-void VChart_Base::setBoundaries()
+void VChart_Base::setBoundaries(bool SendSignal , bool Update)
 {
     makeCurrent();
     glMatrixMode( GL_PROJECTION );
@@ -548,12 +645,16 @@ void VChart_Base::setBoundaries()
     glOrtho( m_BoundaryLeft, m_BoundaryRight, m_BoundaryBottom , m_BoundaryTop, 0, MAX_DEPTH );
     glMatrixMode( GL_MODELVIEW);
 
-    TryUpdate();
+    if( SendSignal )
+        emit SgBoundariesChanged( m_BoundaryLeft, m_BoundaryRight, m_BoundaryBottom , m_BoundaryTop );
+
+    if( Update )
+        TryUpdate();
 }
 
 /////////////////////////
 
-void VChart_Base::setBoundaries(double left, double right, double bottom, double top)
+void VChart_Base::setBoundaries(double left, double right, double bottom, double top, bool SendSignal, bool Update)
 {
     if( right - left < 0.00001 )
     {
@@ -576,14 +677,16 @@ void VChart_Base::setBoundaries(double left, double right, double bottom, double
         m_BoundaryBottom = bottom;
         m_BoundaryTop = top;
     }
-    setBoundaries();
+    setBoundaries( SendSignal, Update );
 }
 
 /////////////////////////
 
 void VChart_Base::TryUpdate(bool CheckAutoZoom)
 {
-    if( CheckAutoZoom && m_AutoZoomETimer.elapsed() > m_AutoZoomInterval && ( m_AutoZoomType == AutoZoom_PeriodicCalculated || m_AutoZoomType == AutoZoom_Calculated ) )
+    if( CheckAutoZoom && m_AutoZoomETimer.elapsed() > m_AutoZoomInterval &&
+            ( ( m_AutoZoomXType == AutoZoom_PeriodicCalculated || m_AutoZoomXType == AutoZoom_Calculated ) ||
+              ( m_AutoZoomYType == AutoZoom_PeriodicCalculated || m_AutoZoomYType == AutoZoom_Calculated )))
     {
         m_AutoZoomETimer.restart();
         if( m_AutoZoomMaxX  > (double)MIN_VALUE &&
@@ -591,13 +694,21 @@ void VChart_Base::TryUpdate(bool CheckAutoZoom)
             m_AutoZoomMaxY  > (double)MIN_VALUE &&
             m_AutoZoomMinY  < (double)MAX_VALUE )
         {
-            if( m_AutoZoomType == AutoZoom_PeriodicCalculated )
+            double XSpacing = m_AutoZoomMaxX - m_AutoZoomMinX;
+            double YSpacing = m_AutoZoomMaxY - m_AutoZoomMinY;
+            double newLeft = m_BoundaryLeft, newRight = m_BoundaryRight, newBottom = m_BoundaryBottom, newTop = m_BoundaryTop;
+            if( m_AutoZoomXType == AutoZoom_PeriodicCalculated )
             {
-                double XSpacing = m_AutoZoomMaxX - m_AutoZoomMinX;
-                double YSpacing = m_AutoZoomMaxY - m_AutoZoomMinY;
-                setBoundaries( m_AutoZoomMinX - XSpacing / 10.0 , m_AutoZoomMaxX + XSpacing / 10.0,
-                               m_AutoZoomMinY - YSpacing / 10.0, m_AutoZoomMaxY + YSpacing / 10.0 );
+                newLeft = m_AutoZoomMinX - XSpacing / m_AutoZoomXCoef;
+                newRight = m_AutoZoomMaxX + XSpacing / m_AutoZoomXCoef;
             }
+            if( m_AutoZoomYType == AutoZoom_PeriodicCalculated )
+            {
+                newBottom = m_AutoZoomMinY - YSpacing / m_AutoZoomYCoef;
+                newTop = m_AutoZoomMaxY + YSpacing / m_AutoZoomYCoef;
+            }
+            setBoundaries( newLeft , newRight,
+                           newBottom, newTop );
         }
 
         m_AutoZoomMaxX                          = (double)MIN_VALUE;
@@ -626,17 +737,47 @@ void VChart_Base::Clear()
     m_AutoZoomMinY                          = std::numeric_limits<double>::max();
 }
 
-void VChart_Base::DoDefaultZoom()
+/////////////////////////
+
+void VChart_Base::Clear(int Idx)
 {
-    setBoundaries(m_BoundaryLeftDefault, m_BoundaryRightDefault, m_BoundaryBottomDefault, m_BoundaryTopDefault);
+
+}
+
+/////////////////////////
+
+void VChart_Base::DoDefaultZoom(bool SendSignal, bool Update )
+{
+    setBoundaries(m_BoundaryLeftDefault, m_BoundaryRightDefault, m_BoundaryBottomDefault, m_BoundaryTopDefault, SendSignal, Update);
     if( m_ScopeMode == SMode_Polar )
         resizeGL( width(), height() );
 }
+
+/////////////////////////
+
+void VChart_Base::AddLabel(QPointF pnt, QString lbl)
+{
+    m_Labels << QPair<QPointF, QString>( pnt, lbl);
+    if( m_ShowLabels )
+        ForceUpdate();
+}
+
+/////////////////////////
+
+void VChart_Base::ClearLabels()
+{
+    m_Labels.clear();
+    TryUpdate();
+}
+
+/////////////////////////
 
 double VChart_Base::MinYSpan() const
 {
     return m_MinYSpan;
 }
+
+/////////////////////////
 
 void VChart_Base::setMinYSpan(double MinYSpan)
 {
@@ -678,6 +819,13 @@ void VChart_Base::setInfoType(const MsgType &InfoType)
 void VChart_Base::TrackMyClick()
 {
     m_TrackClick = true;
+}
+
+/////////////////////////
+
+void VChart_Base::StopTrackingMyClick()
+{
+    m_TrackClick = false;
 }
 
 /////////////////////////
@@ -768,6 +916,40 @@ void VChart_Base::setAxisStyle(const Enum_AxisStyle &AxisStyleX, const Enum_Axis
 
 /////////////////////////
 
+bool VChart_Base::ShowLabels() const
+{
+    return m_ShowLabels;
+}
+
+/////////////////////////
+
+void VChart_Base::setShowLabels(bool ShowLabels)
+{
+    m_ShowLabels = ShowLabels;
+}
+
+double VChart_Base::AutoZoomXCoef() const
+{
+    return m_AutoZoomXCoef;
+}
+
+void VChart_Base::setAutoZoomXCoef(double AutoZoomXCoef)
+{
+    m_AutoZoomXCoef = AutoZoomXCoef;
+}
+
+double VChart_Base::AutoZoomYCoef() const
+{
+    return m_AutoZoomYCoef;
+}
+
+void VChart_Base::setAutoZoomYCoef(double AutoZoomYCoef)
+{
+    m_AutoZoomYCoef = AutoZoomYCoef;
+}
+
+/////////////////////////
+
 void VChart_Base::ForceUpdate()
 {
     updateGL();
@@ -816,7 +998,7 @@ void VChart_Base::CheckRestrictions()
     }
 
     if(Update)
-        setBoundaries();
+        setBoundaries( false );
 }
 
 /////////////////////////
@@ -909,6 +1091,120 @@ void VChart_Base::DoBackGrnPaitings()
         glDisable(GL_LINE_STIPPLE);
     }
 
+}
+
+/////////////////////////
+
+void VChart_Base::DoForeGrnPaitings()
+{
+    double horDiff = m_BoundaryRight - m_BoundaryLeft;
+    double verDiff = m_BoundaryTop - m_BoundaryBottom;
+
+    double HorGapMult = 0.1;
+    double VerGapMult = 0.2;
+
+    double horStep = 0.0;
+    double verStep = 0.0;
+
+    if( m_AxisStyleX == AxisStyle_Near )
+        VerGapMult = 0.0;
+    else if( m_AxisStyleX == AxisStyle_Far )
+        VerGapMult = 0.1;
+    if( m_AxisStyleY ==  AxisStyle_Near )
+        HorGapMult = 0.0;
+    else if( m_AxisStyleY ==  AxisStyle_Far )
+        HorGapMult = 0.1;
+
+    if( m_AxisStyleX == AxisStyle_Near )
+        verStep = ( m_BoundaryTop - m_BoundaryBottom ) / (VER_GRID_CNT+1);
+    else if( m_AxisStyleX == AxisStyle_Far )
+        verStep = ( verDiff - ( ( verDiff ) * VerGapMult ) ) / (VER_GRID_CNT+1);
+
+    if( m_AxisStyleY == AxisStyle_Near )
+        horStep = ( m_BoundaryRight - m_BoundaryLeft ) / (HOR_GRID_CNT+1);
+    else if( m_AxisStyleY == AxisStyle_Far )
+        horStep = ( horDiff - ( ( horDiff ) * HorGapMult ) ) / (HOR_GRID_CNT+1);
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    if( m_IsMouseInside && m_ShowMouseAnnot )
+    {
+        QPointF pos = mouseToScopeCoor( m_LastMousePos );
+        QFont font;
+        font.setFamily( "Calibri" );
+        font.setWeight( 75 );
+        font.setPixelSize( 15 );
+
+        glColor4d( 1.0, 1.0, 1.0, 1.0 );
+        renderText( m_LastMousePos.x() + 13,
+                    m_LastMousePos.y() + 25,
+                    tr("( ")+QString::number(pos.x(), 'F', m_DecimalRoundNumber) + m_XScale+tr(", ")+QString::number(pos.y(), 'F', m_DecimalRoundNumber) + m_YScale +tr(" )"),
+                    font);
+    }
+
+    if( m_IsMouseLeftBtnPressed && ( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare ) )
+    {
+        QPointF pos1 = mouseToScopeCoor( m_LastMousePos );
+        QPointF pos2 = mouseToScopeCoor( m_MouseBasePos );
+        glColor4d( 0.5, 0.5, 0, 0.5 );
+        glBegin( GL_QUADS );
+        glVertex3d( pos1.x(), pos1.y(), 0 );
+        glVertex3d( pos2.x(), pos1.y(), 0 );
+        glVertex3d( pos2.x(), pos2.y(), 0 );
+        glVertex3d( pos1.x(), pos2.y(), 0 );
+        glEnd();
+        glColor4d( 0.0, 1.0, 0, 0.5 );
+        glBegin( GL_LINE_STRIP );
+        glVertex3d( pos1.x(), pos1.y(), 0 );
+        glVertex3d( pos2.x(), pos1.y(), 0 );
+        glVertex3d( pos2.x(), pos2.y(), 0 );
+        glVertex3d( pos1.x(), pos2.y(), 0 );
+        glVertex3d( pos1.x(), pos1.y(), 0 );
+        glEnd();
+    }
+
+    if( m_ShowLabels )
+    {
+
+        QFont font;
+        font.setFamily( "Calibri" );
+        font.setWeight( 75 );
+        font.setPixelSize( 15 );
+        glColor3d( 1.0, 1.0, 1.0 );
+        for( int i = 0; i < m_Labels.count(); i++)
+        {
+            QPointF pos = ScopeToMouseCoor( m_Labels.at(i).first );
+            renderText( pos.x(),
+                        height() - pos.y(),
+                        m_Labels.at(i).second,
+                        font);
+        }
+
+    }
+
+    if( m_InforAlpha > 0.0 )
+    {
+        if( m_InfoType == MsgType_Title )
+        {
+            glColor4d( 1.0, 1.0, 1.0, m_InforAlpha);
+            QFont font;
+            font.setPixelSize( 30 );
+            font.setBold( true );
+            QFontMetrics *fm = new QFontMetrics( font );
+            int len = fm->horizontalAdvance( m_Title );
+            renderText( width() / 2 - len / 2, 50, m_Title, font );
+        }
+        else if( m_InfoType == MsgType_Msg )
+        {
+            glColor4d( 1.0, 0.3, 0.0, m_InforAlpha );
+            QFont font;
+            font.setPixelSize( 30 );
+            font.setBold( true );
+            QFontMetrics *fm = new QFontMetrics( font );
+            int len = fm->horizontalAdvance( m_Message );
+            renderText( width() / 2 - len / 2, 50, m_Message, font );
+        }
+    }
+
     if(m_ShowGridLabelsX)
     {
         if( m_AxisStyleX == AxisStyle_Near )
@@ -972,73 +1268,7 @@ void VChart_Base::DoBackGrnPaitings()
             }
         }
     }
-}
 
-/////////////////////////
-
-void VChart_Base::DoForeGrnPaitings()
-{
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    if( m_IsMouseInside && m_ShowMouseAnnot )
-    {
-        QPointF pos = mouseToScopeCoor( m_LastMousePos );
-        QFont font;
-        font.setFamily( "Calibri" );
-        font.setWeight( 75 );
-        font.setPixelSize( 15 );
-
-        glColor4d( 1.0, 1.0, 1.0, 1.0 );
-        renderText( m_LastMousePos.x() + 13,
-                    m_LastMousePos.y() + 25,
-                    tr("( ")+QString::number(pos.x(), 'F', m_DecimalRoundNumber) + m_XScale+tr(", ")+QString::number(pos.y(), 'F', m_DecimalRoundNumber) + m_YScale +tr(" )"),
-                    font);
-    }
-
-    if( m_IsMouseLeftBtnPressed && ( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare ) )
-    {
-        QPointF pos1 = mouseToScopeCoor( m_LastMousePos );
-        QPointF pos2 = mouseToScopeCoor( m_MouseBasePos );
-        glColor4d( 0.5, 0.5, 0, 0.5 );
-        glBegin( GL_QUADS );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos2.y(), 0 );
-        glEnd();
-        glColor4d( 0.0, 1.0, 0, 0.5 );
-        glBegin( GL_LINE_STRIP );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glEnd();
-    }
-
-
-    if( m_InforAlpha > 0.0 )
-    {
-        if( m_InfoType == MsgType_Title )
-        {
-            glColor4d( 1.0, 1.0, 1.0, m_InforAlpha);
-            QFont font;
-            font.setPixelSize( 30 );
-            font.setBold( true );
-            QFontMetrics *fm = new QFontMetrics( font );
-            int len = fm->horizontalAdvance( m_Title );
-            renderText( width() / 2 - len / 2, 50, m_Title, font );
-        }
-        else if( m_InfoType == MsgType_Msg )
-        {
-            glColor4d( 1.0, 0.3, 0.0, m_InforAlpha );
-            QFont font;
-            font.setPixelSize( 30 );
-            font.setBold( true );
-            QFontMetrics *fm = new QFontMetrics( font );
-            int len = fm->horizontalAdvance( m_Message );
-            renderText( width() / 2 - len / 2, 50, m_Message, font );
-        }
-    }
 }
 
 /////////////////////////

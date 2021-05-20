@@ -21,6 +21,7 @@ public:
     void AddPoints(int Idx, const QVector<QPointF>& pnt, bool Update = false);
     void AddPoints(int Idx, const QVector<QPointF>& Points, const QVector<QString> &Labels, bool Update = false);
 
+    void Clear(int Idx);
 
 protected:
 

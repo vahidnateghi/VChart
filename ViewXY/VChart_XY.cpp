@@ -28,3 +28,4 @@ void VChart_XY::Clear()
         tChnls->Points()->clear();
     }
 }
+

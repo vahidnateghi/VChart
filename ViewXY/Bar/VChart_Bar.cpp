@@ -1,11 +1,11 @@
-#include "VChart_Historgram.h"
+#include "VChart_Bar.h"
 
-VChart_Historgram::VChart_Historgram(QWidget *parent) : VChart_XY(parent)
+VChart_Bar::VChart_Bar(QWidget *parent) : VChart_XY(parent)
 {
 
 }
 
-void VChart_Historgram::AddChannel(QString Title, int BarCount, Enum_Orientation Orientation, QColor BarColor, double LineWidth)
+void VChart_Bar::AddChannel(QString Title, int BarCount, Enum_Orientation Orientation, QColor BarColor, double LineWidth)
 {
     Channel_Bar* Chnl = new Channel_Bar();
 
@@ -18,13 +18,13 @@ void VChart_Historgram::AddChannel(QString Title, int BarCount, Enum_Orientation
     m_Channels.append( Chnl );
 }
 
-void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, bool update)
+void VChart_Bar::SetPointsForHistogram(int ChnlIdx, const QVector<QPointF> &Points, bool update)
 {
     if( ChnlIdx < 0 || ChnlIdx >= m_Channels.count() )
         return;
 
     Channel_Bar* tChnl = (Channel_Bar *)m_Channels.at(ChnlIdx);
-    double Min = 10000000, Max = -10000000;
+    double Min = 100000000000000, Max = -100000000000000;
 
     // Finding Max and Min
     double SectionStep = 1.0;
@@ -71,17 +71,17 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
         }
     }
 
-
     for( int i = 0; i < Points.count(); i++ )
     {
         if( tChnl->Orientation() == Orien_Horizontal )
         {
             for( int j = 0; j < tChnl->BarCount(); j++ )
             {
-                if( Points.at(i).y() < qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
+                if( Points.at(i).y() <= qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
                     Points.at(i).y() >= qMax( Min, Min + ( SectionStep * j - SectionStep / 2.0 ) ))
                 {
                     tChnl->LineLength()->replace( j, tChnl->LineLength()->at(j) + m_HistStep );
+                    break;
                 }
             }
         }
@@ -89,10 +89,11 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
         {
             for( int j = 0; j < tChnl->BarCount(); j++ )
             {
-                if( Points.at(i).x() < qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
+                if( Points.at(i).x() <= qMin( Max, Min + ( SectionStep * j + SectionStep / 2.0 ) ) &&
                     Points.at(i).x() >= qMax( Min, Min - ( SectionStep * j - SectionStep / 2.0 ) ))
                 {
                     tChnl->LineLength()->replace( j, tChnl->LineLength()->at(j) + m_HistStep );
+                    break;
                 }
             }
         }
@@ -104,19 +105,82 @@ void VChart_Historgram::AddPoints(int ChnlIdx, const QVector<QPointF> &Points, b
 
     if( tChnl->Orientation() == Orien_Horizontal )
     {
-        m_AutoZoomMinX = 0.1 * maxLen;
+        m_AutoZoomMinX = 0.0;//-0.1 * maxLen;
         m_AutoZoomMaxX = maxLen;
-        m_AutoZoomMinY = Min - qAbs(Max - Min) * 0.1;
-        m_AutoZoomMaxY = Max + qAbs(Max - Min) * 0.1;
+        if( m_AutoZoomYType == AutoZoom_PeriodicCalculated )
+        {
+            m_AutoZoomMinY = Min;
+            m_AutoZoomMaxY = Max;
+        }
 
     }
     else if( tChnl->Orientation() == Orien_Verical )
     {
-        m_AutoZoomMinX = Min - qAbs(Max - Min) * 0.1;
-        m_AutoZoomMaxX = Max + qAbs(Max - Min) * 0.1;
+        if( m_AutoZoomXType == AutoZoom_PeriodicCalculated )
+        {
+            m_AutoZoomMinX = Min - qAbs(Max - Min) / m_AutoZoomXCoef;
+            m_AutoZoomMaxX = Max + qAbs(Max - Min) / m_AutoZoomXCoef;
+        }
         m_AutoZoomMinY = 0.1 * maxLen;
         m_AutoZoomMaxY = maxLen + maxLen * 0.1;
     }
+
+
+    if( update )
+    {
+        TryUpdate();
+    }
+}
+
+void VChart_Bar::SetPointsForBarItems(int ChnlIdx, const QVector<QPointF> &Points, bool update)
+{
+    Channel_Bar* tChnl = (Channel_Bar *)m_Channels.at(ChnlIdx);
+
+    tChnl->LineStarts()->clear();
+    tChnl->LineLength()->clear();
+
+    double MinX = 100000000000000, MaxX = -100000000000000;
+    double MinY = 100000000000000, MaxY = -100000000000000;
+    double maxLen = -100000000;
+
+    if( tChnl->Orientation() == Orien_Horizontal )
+    {
+        for( int i = 0; i < Points.length(); i++ )
+        {
+            tChnl->LineStarts()->append( QPointF( 0, Points.at(i).x() ) );
+            tChnl->LineLength()->append( Points.at(i).y() );
+
+            if( Points.at(i).y() > maxLen ) maxLen = Points.at(i).y();
+
+            if( Points.at(i).y() > MaxX ) MaxX = Points.at(i).y();
+            if( Points.at(i).y() < MinX ) MinX = Points.at(i).y();
+            if( Points.at(i).x() > MaxY ) MaxY = Points.at(i).x();
+            if( Points.at(i).x() < MinY ) MinY = Points.at(i).x();
+        }
+    }
+    else if( tChnl->Orientation() == Orien_Verical )
+    {
+        for( int i = 0; i < Points.length(); i++ )
+        {
+            tChnl->LineStarts()->append( QPointF( Points.at(i).x(), 0 ) );
+            tChnl->LineLength()->append( Points.at(i).y() );
+
+            if( Points.at(i).y() > maxLen ) maxLen = Points.at(i).y();
+
+            if( Points.at(i).x() > MaxX ) MaxX = Points.at(i).x();
+            if( Points.at(i).x() < MinX ) MinX = Points.at(i).x();
+            if( Points.at(i).y() > MaxY ) MaxY = Points.at(i).y();
+            if( Points.at(i).y() < MinY ) MinY = Points.at(i).y();
+        }
+    }
+
+    if( m_AutoZoomXType == AutoZoom_PeriodicCalculated )
+    {
+        m_AutoZoomMinX = MinX ;
+        m_AutoZoomMaxX = MaxX ;
+    }
+    m_AutoZoomMinY = MinY ;
+    m_AutoZoomMaxY = MaxY ;
 
     if( update )
     {

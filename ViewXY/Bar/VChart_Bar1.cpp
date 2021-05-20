@@ -1,11 +1,11 @@
-#include "VChart_Histogram1.h"
+#include "VChart_Bar1.h"
 
-VChart_Histogram1::VChart_Histogram1(QWidget *parent) : VChart_Historgram(parent)
+VChart_Bar1::VChart_Bar1(QWidget *parent) : VChart_Bar(parent)
 {
 
 }
 
-void VChart_Histogram1::paintGL()
+void VChart_Bar1::paintGL()
 {
     makeCurrent();
 
@@ -22,7 +22,7 @@ void VChart_Histogram1::paintGL()
 
         glLineWidth( tChannel->LineWidth() );
         glColor3d( tChannel->LineColor().redF(), tChannel->LineColor().greenF(), tChannel->LineColor().blueF() );
-        for( int i = 0; i < tChannel->BarCount(); i++ )
+        for( int i = 0; i < tChannel->LineStarts()->count(); i++ )
         {
             glBegin( GL_LINE_STRIP );
             glVertex3d( tChannel->LineStarts()->at(i).x(), tChannel->LineStarts()->at(i).y(), 0 );
