@@ -42,6 +42,7 @@ void VChart_Radial::setMaxRange(int MaxRange)
     genCircleBuffer();
 //    resizeGL(width(), height());
     AdjustAsceptRatio();
+    m_MaxRange = MaxRange;
 }
 
 void VChart_Radial::genCircleBuffer()
