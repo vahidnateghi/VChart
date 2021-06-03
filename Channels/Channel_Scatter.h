@@ -24,10 +24,10 @@ public:
     double PointSizeY() const;
     void setPointSizeY(double PointSizeY);
 
-    QVector<ScatterGroup*> *Groups() const;
+    QList<ScatterGroup *> *Groups() const;
 
-    QVector<QString> Labels() const;
-    void setLabels(const QVector<QString> &Labels);
+    QList<QString> Labels() const;
+    void setLabels(const QList<QString> &Labels);
 
     void Clear();
 
@@ -37,8 +37,8 @@ private:
     double m_PointSizeX;
     double m_PointSizeY;
 
-    QVector<QString> m_Labels;
-    QVector<ScatterGroup*> *m_Groups;
+    QList<QString> m_Labels;
+    QList<ScatterGroup*> *m_Groups;
 
 };
 

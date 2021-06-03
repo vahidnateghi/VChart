@@ -18,8 +18,8 @@ public:
                     int FadeoutDuration = -1,
                     bool ShowLabels = true);
 
-    void AddPoints(int Idx, const QVector<QPointF>& pnt, bool Update = false);
-    void AddPoints(int Idx, const QVector<QPointF>& Points, const QVector<QString> &Labels, bool Update = false);
+    void AddPoints(int Idx, const QList<QPointF> &pnt, bool Update = false);
+    void AddPoints(int Idx, const QList<QPointF> &Points, const QList<QString> &Labels, bool Update = false);
 
     void Clear(int Idx);
 

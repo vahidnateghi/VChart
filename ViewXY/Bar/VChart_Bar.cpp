@@ -18,7 +18,7 @@ void VChart_Bar::AddChannel(QString Title, int BarCount, Enum_Orientation Orient
     m_Channels.append( Chnl );
 }
 
-void VChart_Bar::SetPointsForHistogram(int ChnlIdx, const QVector<QPointF> &Points, bool update)
+void VChart_Bar::SetPointsForHistogram(int ChnlIdx, const QList<QPointF> &Points, bool update)
 {
     if( ChnlIdx < 0 || ChnlIdx >= m_Channels.count() )
         return;

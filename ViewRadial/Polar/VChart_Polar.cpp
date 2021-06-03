@@ -6,7 +6,7 @@ VChart_Polar::VChart_Polar(QWidget *parent) : VChart_Radial(parent)
 
 }
 
-void VChart_Polar::AddChannel(QString Title, QColor PointColor, double PointSize, bool ShowLabels, int FadeoutDuration)
+void VChart_Polar::AddChannel(QString Title, Enum_PointShape PointShape, QColor PointColor, double PointSize, bool ShowLabels, int FadeoutDuration)
 {
     Channel_Polar* Chnl = new Channel_Polar();
 
@@ -15,12 +15,13 @@ void VChart_Polar::AddChannel(QString Title, QColor PointColor, double PointSize
     Chnl->setPointSizeX( PointSize );
     Chnl->setPointSizeY( PointSize );
     Chnl->setShowLabels( ShowLabels );
+    Chnl->setPointShape( PointShape );
     Chnl->setFadeDuration( FadeoutDuration );
 
     m_Channels.append( Chnl );
 }
 
-void VChart_Polar::AddPoints(int Idx, const QVector<QPointF> &pnt)
+void VChart_Polar::AddPoints(int Idx, const QList<QPointF> &pnt)
 {
     if(Idx < 0 || Idx >= m_Channels.count())
         return;
@@ -51,6 +52,33 @@ void VChart_Polar::AddPoints(int Idx, const QVector<QPointF> &pnt)
         }
     }
     else if(tChannel->PointShape() == Shape_Circle)
+    {
+        int Reso = (int)tChannel->PointShape();
+        tPntSize = pnt.count() * Reso;
+
+        tSize = ScopeToMouseRatio( tSize );
+        tSize = QPointF( qMax( tSize.x(), tSize.y() ), qMax( tSize.x(), tSize.y() ) );
+        tSize = mouseToScopeRatio( tSize );
+
+        for(int i = 0; i < pnt.count(); i++)
+        {
+            m_AutoZoomMaxX = qMax(m_AutoZoomMaxX, pnt[i].x());
+            m_AutoZoomMinX = qMin(m_AutoZoomMinX, pnt[i].x());
+            m_AutoZoomMaxY = qMax(m_AutoZoomMaxY, pnt[i].y());
+            m_AutoZoomMinY = qMin(m_AutoZoomMinY, pnt[i].y());
+
+            for(int j = 0; j < Reso; j++)
+            {
+                float theta = 2.0f * M_PI * float(j) / float(Reso);//get the current angle
+
+                float x = tSize.x() / 2.0 * cosf(theta);//calculate the x component
+                float y = tSize.y() / 2.0 * sinf(theta);//calculate the y component
+
+                tPoints.append( vVertex(x + pnt[i].x(), y + pnt[i].y(), 0) );
+            }
+        }
+    }
+    else if(tChannel->PointShape() == Shape_FilledCircle)
     {
         int Reso = (int)tChannel->PointShape();
         tPntSize = pnt.count() * Reso;
@@ -150,10 +178,21 @@ void VChart_Polar::AddPoints(int Idx, const QVector<QPointF> &pnt)
     grp->Opacity     = 1.0;
     grp->StartTime   = QDateTime::currentDateTime();
 
+    if( tChannel->FadeDuration() == -1 )
+    {
+        for( int i = 0; i < tChannel->Groups()->size(); i++ )
+        {
+            GLuint buffToBeDeleted = tChannel->Groups()->at(i)->BufferID;
+            glDeleteBuffers( 1, &buffToBeDeleted );
+            delete tChannel->Groups()->at(i);
+        }
+    }
+    tChannel->Groups()->clear();
+
     tChannel->Groups()->append( grp );
 }
 
-void VChart_Polar::AddPoints(int Idx, const QVector<QPointF> &Points, const QVector<QString> &Labels)
+void VChart_Polar::AddPoints(int Idx, const QList<QPointF> &Points, const QList<QString> &Labels)
 {
     if(Idx < 0 || Idx >= m_Channels.count())
         return;

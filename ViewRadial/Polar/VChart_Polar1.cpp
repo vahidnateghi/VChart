@@ -23,7 +23,7 @@ void VChart_Polar1::paintGL()
         for(int i = tChannel->Groups()->count() - 1; i >= 0; i--)
         {
             qint64 age = tChannel->Groups()->at(i)->StartTime.msecsTo( QDateTime::currentDateTime() );
-            if( age > tChannel->FadeDuration() )
+            if( age > tChannel->FadeDuration() && tChannel->FadeDuration() != -1 )
             {
                 GLuint buffToBeDeleted = tChannel->Groups()->at(i)->BufferID;
                 glDeleteBuffers( 1, &buffToBeDeleted );
@@ -45,6 +45,16 @@ void VChart_Polar1::paintGL()
                 for(int j = 0; j < tPntSize; j++)
                 {
                     glDrawArrays( GL_LINE_LOOP, j * Reso, Reso );
+                }
+            }
+            else if(tChannel->PointShape() == Shape_FilledCircle)
+            {
+//                glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+                int Reso = (int)tChannel->PointShape();
+                int tPntSize = tChannel->Groups()->at(i)->PointCnt / Reso;
+                for(int j = 0; j < tPntSize; j++)
+                {
+                    glDrawArrays( GL_POLYGON, j * Reso, Reso );
                 }
             }
             else if(tChannel->PointShape() == Shape_Square)

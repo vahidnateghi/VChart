@@ -25,7 +25,7 @@ void VChart_Scatter::AddChannel(QString Title, QColor Color, Enum_PointShape Poi
 
 /////////////////////////
 
-void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt, bool Update)
+void VChart_Scatter::AddPoints(int Idx, const QList<QPointF> &pnt, bool Update)
 {
     if(Idx < 0 || Idx >= m_Channels.count() || pnt.count() == 0)
         return;
@@ -174,7 +174,7 @@ void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &pnt, bool Update
 
 /////////////////////////
 
-void VChart_Scatter::AddPoints(int Idx, const QVector<QPointF> &Points, const QVector<QString> &Labels, bool Update)
+void VChart_Scatter::AddPoints(int Idx, const QList<QPointF> &Points, const QList<QString> &Labels, bool Update)
 {
     if(Idx < 0 || Idx >= m_Channels.count() || Points.count() == 0)
         return;

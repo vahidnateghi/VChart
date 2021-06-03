@@ -154,6 +154,8 @@ void Channel_Intensity::SetValue(double X, double Y, double Val)
 
     int XIdx = qRound( (X - m_StartX) / m_StepX );
     int YIdx = qRound( (Y - m_StartY) / m_StepY );
+
+    SetValue( XIdx, YIdx, Val );
 }
 
 double Channel_Intensity::GetValue(double X, double Y)

@@ -8,6 +8,7 @@ class VChart_Bar1 : public VChart_Bar
     Q_OBJECT
 public:
     explicit VChart_Bar1(QWidget *parent = nullptr);
+    ~VChart_Bar1();
 
 protected:
     void paintGL();

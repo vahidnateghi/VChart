@@ -5,6 +5,11 @@ VChart_Bar1::VChart_Bar1(QWidget *parent) : VChart_Bar(parent)
 
 }
 
+VChart_Bar1::~VChart_Bar1()
+{
+
+}
+
 void VChart_Bar1::paintGL()
 {
     makeCurrent();

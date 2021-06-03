@@ -2,7 +2,7 @@
 
 Channel_Scatter::Channel_Scatter(QObject *parent) : Channel_Base(parent)
 {
-    m_Groups = new QVector<ScatterGroup *>();
+    m_Groups = new QList<ScatterGroup *>();
 
     m_PointShape = Shape_Point;
     m_FadeDuration = 0;
@@ -40,17 +40,17 @@ void Channel_Scatter::setPointSizeY(double PointSizeY)
     m_PointSizeY = PointSizeY;
 }
 
-QVector<ScatterGroup *> *Channel_Scatter::Groups() const
+QList<ScatterGroup *> *Channel_Scatter::Groups() const
 {
     return m_Groups;
 }
 
-QVector<QString> Channel_Scatter::Labels() const
+QList<QString> Channel_Scatter::Labels() const
 {
     return m_Labels;
 }
 
-void Channel_Scatter::setLabels(const QVector<QString> &Labels)
+void Channel_Scatter::setLabels(const QList<QString> &Labels)
 {
     m_Labels = Labels;
 }

@@ -12,7 +12,7 @@ public:
 
     void AddChannel(QString Title = "", int BarCount = 4, Enum_Orientation Orientation = Orien_Verical, QColor BarColor = Qt::red, double LineWidth = 2.0);
 
-    void SetPointsForHistogram(int ChnlIdx, const QVector<QPointF>& Points, bool update = true);
+    void SetPointsForHistogram(int ChnlIdx, const QList<QPointF> &Points, bool update = true);
 
     void SetPointsForBarItems(int ChnlIdx, const QVector<QPointF>& Points, bool update = true);
 

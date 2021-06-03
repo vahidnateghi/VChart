@@ -47,6 +47,7 @@ enum Enum_PointShape
 {
     Shape_Bleep = 6,
     Shape_Circle = 20,
+    Shape_FilledCircle = 21,
     Shape_Triangle = 3,
     Shape_Square = 4,
     Shape_Point = 1
@@ -117,7 +118,7 @@ struct ScatterGroup
 {
     GLuint                  BufferID;
     int                     PointCnt;
-    QVector<QPointF>        BasePoints;
+    QList<QPointF>        BasePoints;
     QDateTime               StartTime;
     double                  Opacity;
 

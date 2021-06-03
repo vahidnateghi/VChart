@@ -2,7 +2,7 @@
 
 Channel_Polar::Channel_Polar(QObject *parent) : Channel_Base(parent)
 {
-    m_Groups = new QVector<ScatterGroup *>();
+    m_Groups = new QList<ScatterGroup *>();
 
     m_PointShape = Shape_Point;
     m_FadeDuration = 0;
@@ -40,17 +40,17 @@ void Channel_Polar::setPointSizeY(double PointSizeY)
     m_PointSizeY = PointSizeY;
 }
 
-QVector<ScatterGroup *> *Channel_Polar::Groups() const
+QList<ScatterGroup *> *Channel_Polar::Groups() const
 {
     return m_Groups;
 }
 
-QVector<QString> Channel_Polar::Labels() const
+QList<QString> Channel_Polar::Labels() const
 {
     return m_Labels;
 }
 
-void Channel_Polar::setLabels(const QVector<QString> &Labels)
+void Channel_Polar::setLabels(const QList<QString> &Labels)
 {
     m_Labels = Labels;
 }

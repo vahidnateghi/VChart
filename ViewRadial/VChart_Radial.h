@@ -13,15 +13,19 @@ public:
 
     void setShowCrossLines(bool ShowCrossLines, QColor CrossLineColor);
 
+    int MaxRange() const;
+    void setMaxRange(int MaxRange);
+
 protected:
     int                     m_CircleBufferCount;
     int                     m_CircleBufferLength;
     GLuint *                m_CircleBuffer;
-    int                     m_MaxRange;
+    double                  m_MaxRange;
     bool                    m_ShowCrossLines;
     QColor                  m_CrossLineColor;
 
-    void                    DoBackGrnPaitings();
+    void                    DoBackGrnPaitings() override;
+    void                    DoForeGrnPaitings() override;
     void                    genCircleBuffer();
 
     void                    initializeGL();
