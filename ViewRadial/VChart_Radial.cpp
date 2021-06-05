@@ -1,5 +1,6 @@
 #include "VChart_Radial.h"
 #include <QtMath>
+#include <iostream>
 
 VChart_Radial::VChart_Radial(QWidget *parent) : VChart_Base(parent)
 {
@@ -40,7 +41,7 @@ void VChart_Radial::setMaxRange(int MaxRange)
     m_BoundaryTop               = +1 * ( m_MaxRange + ( m_MaxRange / m_AutoZoomYCoef ) );
 
     genCircleBuffer();
-//    resizeGL(width(), height());
+    //    resizeGL(width(), height());
     AdjustAsceptRatio();
     m_MaxRange = MaxRange;
 }
@@ -119,14 +120,14 @@ void VChart_Radial::DoBackGrnPaitings()
         {
             QPointF Mouse = ScopeToMouseCoor( QPointF(0, i * div + 50) );
             renderText( -mouseToScopeRatio(QPointF( fm.width( N( i * div ) ) / 2.0, 0.0 )).x(), i * div, 0, N( i * div ) );
-//            renderText( Mouse.x(), Mouse.y(), N( i * div ), fm );
+            //            renderText( Mouse.x(), Mouse.y(), N( i * div ), fm );
         }
     }
 
     if(m_ShowCrossLines)
     {
-//        glLineStipple(1, 0xCCCC);
-//        glEnable(GL_LINE_STIPPLE);
+        //        glLineStipple(1, 0xCCCC);
+        //        glEnable(GL_LINE_STIPPLE);
         glColor4d( m_CrossLineColor.redF(), m_CrossLineColor.greenF(), m_CrossLineColor.blueF() ,0.1 );
         for(int i = 0 ; i < 180; i++)
         {
@@ -135,7 +136,7 @@ void VChart_Radial::DoBackGrnPaitings()
             glVertex3d( -qSin( ANGLE2RAD(i) ) * m_MaxRange,  -qCos( ANGLE2RAD(i) ) * m_MaxRange, 0 );
             glEnd();
         }
-//        glDisable(GL_LINE_STIPPLE);
+        //        glDisable(GL_LINE_STIPPLE);
     }
 }
 
@@ -185,25 +186,72 @@ void VChart_Radial::DoForeGrnPaitings()
                     font);
     }
 
-    if( m_IsMouseLeftBtnPressed && ( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare ) )
+    if( m_IsMouseLeftBtnPressed )
     {
         QPointF pos1 = mouseToScopeCoor( m_LastMousePos );
         QPointF pos2 = mouseToScopeCoor( m_MouseBasePos );
-        glColor4d( 0.5, 0.5, 0, 0.5 );
-        glBegin( GL_QUADS );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos2.y(), 0 );
-        glEnd();
-        glColor4d( 0.0, 1.0, 0, 0.5 );
-        glBegin( GL_LINE_STRIP );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glEnd();
+
+        if( m_TrackClick )
+        {
+            QList<QPointF> drawPnts;
+
+            double StartRadian = qAtan2( pos2.y(), pos2.x() );
+            if( StartRadian > M_PI ) StartRadian -= ( 2.0 * M_PI );
+            double StopRadian = qAtan2( pos1.y(), pos1.x() );
+            if( StopRadian > M_PI ) StopRadian -= ( 2.0 * M_PI );
+
+            double StartR = qSqrt( qPow( pos2.x(), 2 ) + qPow( pos2.y(), 2 ) );
+            double StopR = qSqrt( qPow( pos1.x(), 2 ) + qPow( pos1.y(), 2 ) );
+
+            double DeltaRadian = StopRadian - StartRadian;
+            if( DeltaRadian > M_PI ) DeltaRadian -= ( 2.0 * M_PI );
+            if( DeltaRadian < -M_PI ) DeltaRadian += ( 2.0 * M_PI );
+
+            double arcPntCnt = 20;
+            for( int i = 0; i <= arcPntCnt; i++ )
+            {
+                double x = StartR * qCos( StartRadian + (DeltaRadian / arcPntCnt) * i );
+                double y = StartR * qSin( StartRadian + (DeltaRadian / arcPntCnt) * i );
+                drawPnts << QPointF( x, y );
+            }
+
+            for( int i = 0; i <= arcPntCnt; i++ )
+            {
+                double x = StopR * qCos( StopRadian - (DeltaRadian / arcPntCnt) * i );
+                double y = StopR * qSin( StopRadian - (DeltaRadian / arcPntCnt) * i );
+                drawPnts << QPointF( x, y );
+            }
+
+            glColor4d( 1.0, 1.0, 0.0, 1.0 );
+            glLineWidth( 2.0 );
+            glEnable( GL_LINE_STIPPLE );
+            glLineStipple(1, 0xCCCC);
+            glBegin( GL_LINE_LOOP );
+
+            for( int i = 0; i < drawPnts.size(); i++ )
+                glVertex3d( drawPnts[i].x(), drawPnts[i].y(), 0.0 );
+
+            glEnd();
+            glDisable( GL_LINE_STIPPLE );
+        }
+        else if( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare )
+        {
+            glColor4d( 0.5, 0.5, 0, 0.5 );
+            glBegin( GL_QUADS );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos2.y(), 0 );
+            glEnd();
+            glColor4d( 0.0, 1.0, 0, 0.5 );
+            glBegin( GL_LINE_STRIP );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glEnd();
+        }
     }
 
     if( m_ShowLabels )

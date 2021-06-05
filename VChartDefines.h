@@ -69,6 +69,14 @@ enum Enum_Orientation
     Orien_Verical
 };
 
+enum Enum_TrackType
+{
+    TrackType_Point,
+    TrackType_Square,
+    TrackType_Arc,
+    TrackType_None
+};
+
 enum Enum_AxisStyle
 {
     AxisStyle_Near,

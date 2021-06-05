@@ -471,7 +471,100 @@ void VChart_Base::mouseReleaseEvent(QMouseEvent *e)
             return;
         }
 
-        if( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare )
+        if( m_TrackClick )
+        {
+            double newLeft      = qMin( pos1.x(), pos2.x() );
+            double newRight     = qMax( pos1.x(), pos2.x() );
+            double newBottom    = qMin( pos1.y(), pos2.y() );
+            double newTop       = qMax( pos1.y(), pos2.y() );
+
+            if( m_ScopeMode == SMode_Scatter )
+            {
+                QList<QList<QPointF>> PntCollect;
+                for( int i = 0; i < m_Channels.count(); i++ )
+                {
+                    Channel_Scatter* tChannel = (Channel_Scatter*)m_Channels[i];
+
+                    QList<QPointF> Pnts;
+                    for( int j = 0; j < tChannel->Groups()->count(); j++ )
+                    {
+                        for( int k = 0; k < tChannel->Groups()->at(j)->BasePoints.count(); k++ )
+                        {
+                            QPointF tPnt = tChannel->Groups()->at(j)->BasePoints.at(k);
+                            if( tPnt.x() >= newLeft && tPnt.x() <= newRight &&
+                                tPnt.y() >= newBottom && tPnt.y() <= newTop )
+                            {
+                                Pnts << tPnt;
+                            }
+                        }
+                    }
+                    PntCollect << Pnts;
+                }
+
+                emit SgTrackedClick( PntCollect );
+                return;
+            }
+            else if( m_ScopeMode == SMode_Polar )
+            {
+                double StartRadian = qAtan2( pos2.y(), pos2.x() );
+                while( StartRadian < 0 ) StartRadian += ( 2.0 * M_PI );
+                double StopRadian = qAtan2( pos1.y(), pos1.x() );
+                while( StopRadian < 0 ) StopRadian += ( 2.0 * M_PI );
+                double MinRadian = qMin( StartRadian, StopRadian );
+                double MaxRadian = qMax( StartRadian, StopRadian );
+
+                double StartR = qSqrt( qPow( pos2.x(), 2 ) + qPow( pos2.y(), 2 ) );
+                double StopR = qSqrt( qPow( pos1.x(), 2 ) + qPow( pos1.y(), 2 ) );
+                double MaxR = qMax( StartR, StopR );
+                double MinR = qMin( StartR, StopR );
+
+                double DeltaRadian = MaxRadian - MinRadian;
+                double RadOffset = 0.0;
+                while( DeltaRadian > M_PI )
+                {
+                    RadOffset += ( 2.0 * M_PI );
+                    MinRadian += ( 2.0 * M_PI );
+                    double tMinRad = MinRadian;
+                    double tMaxRad = MaxRadian;
+                    MinRadian = qMin( tMinRad, tMaxRad );
+                    MaxRadian = qMax( tMinRad, tMaxRad );
+                    DeltaRadian = MaxRadian - MinRadian;
+                }
+
+                QList<QList<QPointF>> PntCollect;
+                for( int i = 0; i < m_Channels.count(); i++ )
+                {
+                    Channel_Scatter* tChannel = (Channel_Scatter*)m_Channels[i];
+
+                    QList<QPointF> Pnts;
+                    for( int j = 0; j < tChannel->Groups()->count(); j++ )
+                    {
+                        for( int k = 0; k < tChannel->Groups()->at(j)->BasePoints.count(); k++ )
+                        {
+                            QPointF tPnt = tChannel->Groups()->at(j)->BasePoints.at(k);
+                            double r = qSqrt( qPow( tPnt.x(), 2 ) + qPow( tPnt.y(), 2 ) );
+                            double angl = qAtan2( tPnt.y(), tPnt.x() );
+                            while( angl < 0 ) angl += ( 2.0 * M_PI );
+
+                            if( r >= MinR && r <= MaxR &&
+                                (
+                                    ( ( angl + RadOffset ) >= MinRadian && ( angl + RadOffset ) <= MaxRadian ) ||
+                                    ( angl >= MinRadian && angl <= MaxRadian )
+                                ) )
+                            {
+                                Pnts << tPnt;
+                            }
+                        }
+                    }
+                    PntCollect << Pnts;
+                }
+
+                emit SgTrackedClick( PntCollect );
+                return;
+            }
+        }
+
+        else if( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare )
         {
             double newLeft      = qMin( pos1.x(), pos2.x() );
             double newRight     = qMax( pos1.x(), pos2.x() );
@@ -480,38 +573,6 @@ void VChart_Base::mouseReleaseEvent(QMouseEvent *e)
 
             double XSpan = newRight - newLeft;
             double YSpan = newTop - newBottom;
-
-            if( m_TrackClick )
-            {
-//                m_TrackClick = false;
-
-                if( m_ScopeMode == SMode_Scatter )
-                {
-                    QList<QList<QPointF>> PntCollect;
-                    for( int i = 0; i < m_Channels.count(); i++ )
-                    {
-                        Channel_Scatter* tChannel = (Channel_Scatter*)m_Channels[i];
-
-                        QList<QPointF> Pnts;
-                        for( int j = 0; j < tChannel->Groups()->count(); j++ )
-                        {
-                            for( int k = 0; k < tChannel->Groups()->at(j)->BasePoints.count(); k++ )
-                            {
-                                QPointF tPnt = tChannel->Groups()->at(j)->BasePoints.at(k);
-                                if( tPnt.x() >= newLeft && tPnt.x() <= newRight &&
-                                    tPnt.y() >= newBottom && tPnt.y() <= newTop )
-                                {
-                                    Pnts << tPnt;
-                                }
-                            }
-                        }
-                        PntCollect << Pnts;
-                    }
-
-                    emit SgTrackedClick( PntCollect );
-                    return;
-                }
-            }
 
             if( XSpan >= m_MinXSpan )
             {
@@ -1141,25 +1202,42 @@ void VChart_Base::DoForeGrnPaitings()
                     font);
     }
 
-    if( m_IsMouseLeftBtnPressed && ( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare ) )
+    if( m_IsMouseLeftBtnPressed  )
     {
         QPointF pos1 = mouseToScopeCoor( m_LastMousePos );
         QPointF pos2 = mouseToScopeCoor( m_MouseBasePos );
-        glColor4d( 0.5, 0.5, 0, 0.5 );
-        glBegin( GL_QUADS );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos2.y(), 0 );
-        glEnd();
-        glColor4d( 0.0, 1.0, 0, 0.5 );
-        glBegin( GL_LINE_STRIP );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos1.y(), 0 );
-        glVertex3d( pos2.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos2.y(), 0 );
-        glVertex3d( pos1.x(), pos1.y(), 0 );
-        glEnd();
+
+        if( m_TrackClick)
+        {
+            glEnable( GL_LINE_STIPPLE );
+            glLineStipple(1, 0xCCCC);
+            glColor4d( 1.0, 1.0, 0, 1.0);
+            glBegin( GL_LINE_LOOP );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos2.y(), 0 );
+            glEnd();
+            glDisable( GL_LINE_STIPPLE );
+        }
+        else if( m_ZoomType == ZoomType_Square || m_ZoomType == ZoomType_WheelAndSquare )
+        {
+            glColor4d( 0.5, 0.5, 0, 0.5 );
+            glBegin( GL_QUADS );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos2.y(), 0 );
+            glEnd();
+            glColor4d( 0.0, 1.0, 0, 0.5 );
+            glBegin( GL_LINE_STRIP );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos1.y(), 0 );
+            glVertex3d( pos2.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos2.y(), 0 );
+            glVertex3d( pos1.x(), pos1.y(), 0 );
+            glEnd();
+        }
     }
 
     if( m_ShowLabels )
