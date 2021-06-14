@@ -342,9 +342,14 @@ void VChart_Base::initializeGL()
 {
     makeCurrent();
     initializeOpenGLFunctions();
+    glEnable( GL_POINT_SPRITE );
     glEnable(GL_POINT_SMOOTH);
-    glEnable( GL_PROGRAM_POINT_SIZE );
+    glEnable(GL_LINE_SMOOTH);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    glEnable( GL_PROGRAM_POINT_SIZE );
+
     glEnable( GL_COLOR_BUFFER_BIT );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -358,6 +363,23 @@ void VChart_Base::initializeGL()
 //    format.setSamples( 8 );
 //    setFormat( format );
     glEnable( GL_MULTISAMPLE );
+
+    m_Program.addShaderFromSourceCode( QOpenGLShader::Vertex,   "#version 430 core\n"
+                                                                "layout(location = 0) in vec4 vPosition;\n"
+                                                                "void main()\n"
+                                                                "{\n"
+                                                                "   gl_Position = vPosition;\n"
+                                                                "}\n" );
+    m_Program.addShaderFromSourceCode( QOpenGLShader::Fragment, "#version 430 core\n"
+                                                                "out vec4 fColor;\n"
+                                                                "void main()\n"
+                                                                "{\n"
+                                                                "   vec2 coord = gl_PointCoord - vec2(0.5);  //from [0,1] to [-0.5,0.5]\n"
+                                                                "   if(length(coord) > 0.5)                  //outside of circle radius?\n"
+                                                                "       discard;\n"
+                                                                "}\n" );
+    if( !m_Program.link() )
+        qDebug() << "Link Fail!";
 }
 
 /////////////////////////

@@ -43,3 +43,6 @@ SOURCES +=  \
     $$PWD/ViewRadial/Polar/VChart_Polar.cpp \
     $$PWD/ViewRadial/Polar/VChart_Polar1.cpp \
     $$PWD/Channels/Channel_Polar.cpp
+
+RESOURCES += \
+    $$PWD/res.qrc

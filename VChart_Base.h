@@ -13,6 +13,7 @@
 #include <QTimer>
 #include <QPair>
 #include <QList>
+#include <QOpenGLShaderProgram>
 #include "VChartDefines.h"
 #include "Channels/Channel_Base.h"
 
@@ -179,6 +180,8 @@ protected:
     Enum_AxisStyle          m_AxisStyleY;
     double                  m_AutoZoomXCoef;
     double                  m_AutoZoomYCoef;
+
+    QOpenGLShaderProgram    m_Program;
 
     QList<QPair<QPointF, QString>> m_Labels;
     bool                    m_ShowLabels;

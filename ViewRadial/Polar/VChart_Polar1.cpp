@@ -78,6 +78,20 @@ void VChart_Polar1::paintGL()
                 }
                 glPointSize( 1 );
             }
+            else if(tChannel->PointShape() == Shape_GLSLPoint)
+            {
+                m_Program.bind();
+                QPointF tpSize = ScopeToMouseRatio( QPointF( tChannel->PointSizeX(), tChannel->PointSizeX() ) );
+                glPointSize( tpSize.x() );
+                int Reso = (int)tChannel->PointShape();
+                int tPntSize = tChannel->Groups()->at(i)->PointCnt / Reso;
+                for(int j = 0; j < tPntSize; j++)
+                {
+                    glDrawArrays( GL_POINTS, j * Reso, Reso );
+                }
+                glPointSize( 1 );
+                m_Program.release();
+            }
             else if(tChannel->PointShape() == Shape_Triangle)
             {
                 int Reso = (int)tChannel->PointShape();

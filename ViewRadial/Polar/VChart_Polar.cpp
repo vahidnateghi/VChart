@@ -163,13 +163,27 @@ void VChart_Polar::AddPoints(int Idx, const QList<QPointF> &pnt)
             tPoints.append( vVertex(pnt[i].x(), pnt[i].y(), 0) );
         }
     }
+    else if(tChannel->PointShape() == Shape_GLSLPoint)
+    {
+        int Reso = (int)tChannel->PointShape();
+        tPntSize = pnt.count() * 1;
+        for(int i = 0; i < pnt.count(); i++)
+        {
+            m_AutoZoomMaxX = qMax(m_AutoZoomMaxX, pnt[i].x());
+            m_AutoZoomMinX = qMin(m_AutoZoomMinX, pnt[i].x());
+            m_AutoZoomMaxY = qMax(m_AutoZoomMaxY, pnt[i].y());
+            m_AutoZoomMinY = qMin(m_AutoZoomMinY, pnt[i].y());
+
+            tPoints.append( vVertex(pnt[i].x(), pnt[i].y(), 0) );
+        }
+    }
     makeCurrent();
     GLuint id;
     glGenBuffers( 1, &id );
 
     glBindBuffer( GL_ARRAY_BUFFER, id );
 
-    glBufferData( GL_ARRAY_BUFFER, sizeof(vVertex) * tPntSize, tPoints.data(), GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(vVertex) * tPntSize, tPoints.data(), GL_DYNAMIC_DRAW );
 
     ScatterGroup *grp = new ScatterGroup();
     grp->BasePoints  = pnt;

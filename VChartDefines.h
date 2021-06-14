@@ -50,7 +50,8 @@ enum Enum_PointShape
     Shape_FilledCircle = 21,
     Shape_Triangle = 3,
     Shape_Square = 4,
-    Shape_Point = 1
+    Shape_Point = 1,
+    Shape_GLSLPoint = 2
 };
 
 enum ScopeMode
