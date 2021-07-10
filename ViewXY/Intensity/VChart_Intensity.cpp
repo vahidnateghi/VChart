@@ -1,5 +1,7 @@
 #include "VChart_Intensity.h"
 #include <iostream>
+using namespace std;
+
 
 VChart_Intensity::VChart_Intensity(QWidget *parent) : VChart_XY(parent)
 {
@@ -24,7 +26,8 @@ void VChart_Intensity::AddChannel(QString Title, double StartX, double StopX, do
 
     for( int i = 0; i < tChannel->YReso() - 1; i++ )
     {
-        vVertex Row[ 2 * tChannel->XReso() ];
+        std::vector<vVertex> Row;
+        Row.resize( 2 * tChannel->XReso() );
 //        glGenBuffers( 1, &tChannel->m_ValuePoints[i] );
         for( int j = 0; j < tChannel->XReso(); j++ )
         {
@@ -49,7 +52,7 @@ void VChart_Intensity::AddChannel(QString Title, double StartX, double StopX, do
 
         makeCurrent();
         glBindBuffer( GL_ARRAY_BUFFER, tChannel->m_ValuePoints.at(i) );
-        glBufferData( GL_ARRAY_BUFFER, sizeof(vVertex) * 2 * tChannel->XReso(), Row, GL_STATIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, sizeof(vVertex) * 2 * tChannel->XReso(), Row.data(), GL_STATIC_DRAW );
     }
 
     m_Channels.append( tChannel );
@@ -123,9 +126,9 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
         NewV1.y = tChannel->StartY() + tChannel->StepY() * ( YIdx + 1 );
         NewV1.z = 0.0;
         NewV1.val = Val;
-        NewV1.r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-        NewV1.g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-        NewV1.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV1.r = tChannel->MinColor().redF()       + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() )         * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV1.g = tChannel->MinColor().greenF()     + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() )     * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV1.b = tChannel->MinColor().blueF()      + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() )       * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
         NewV1.a = 1.0;
 
         makeCurrent();
@@ -138,9 +141,9 @@ void VChart_Intensity::SetValue(int Idx, int XIdx, int YIdx, double Val)
         NewV2.y = tChannel->StartY() + tChannel->StepY() * YIdx;
         NewV2.z = 0.0;
         NewV2.val = Val;
-        NewV2.r = tChannel->MinColor().redF() + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-        NewV2.g = tChannel->MinColor().greenF() + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
-        NewV2.b = tChannel->MinColor().blueF() + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() ) * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV2.r = tChannel->MinColor().redF()       + ( tChannel->MaxColor().redF() - tChannel->MinColor().redF() )         * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV2.g = tChannel->MinColor().greenF()     + ( tChannel->MaxColor().greenF() - tChannel->MinColor().greenF() )     * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
+        NewV2.b = tChannel->MinColor().blueF()      + ( tChannel->MaxColor().blueF() - tChannel->MinColor().blueF() )       * qAbs((Val - tChannel->MinVal()) / (tChannel->MaxVal() - tChannel->MinVal()));
         NewV2.a = 1.0;
 
         makeCurrent();
