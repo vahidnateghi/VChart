@@ -33,8 +33,7 @@ public:
     QColor BackColor() const;
     void setBackColor(const QColor &BackColor);
 
-    int DecimalRoundNumber() const;
-    void setDecimalRoundNumber(int DecimalRoundNumber);
+    void setDecimalRoundNumber(int DecimalRoundNumberX, int DecimalRoundNumberY);
 
     bool ShowMouseAnnot() const;
     void setShowMouseAnnot(bool ShowMouseAnnot);
@@ -161,7 +160,8 @@ protected:
     MsgType                 m_InfoType;
     int                     m_UpdateInterval;
     int                     m_AutoZoomInterval;
-    int                     m_DecimalRoundNumber;
+    int                     m_DecimalRoundNumberX;
+    int                     m_DecimalRoundNumberY;
     QColor                  m_BackColor;
     QColor                  m_GridColor;
     QColor                  m_GridLabelColor;

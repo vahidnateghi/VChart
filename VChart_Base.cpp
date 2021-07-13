@@ -84,7 +84,8 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
 
     m_UpdateInterval                        = 100;
     m_AutoZoomInterval                      = 1000;
-    m_DecimalRoundNumber                    = 2;
+    m_DecimalRoundNumberX                    = 2;
+    m_DecimalRoundNumberY                    = 2;
 }
 
 // /////////////////////// PUBLIC
@@ -117,16 +118,10 @@ void VChart_Base::setBackColor(const QColor &BackColor)
 
 /////////////////////////
 
-int VChart_Base::DecimalRoundNumber() const
+void VChart_Base::setDecimalRoundNumber(int DecimalRoundNumberX, int DecimalRoundNumberY)
 {
-    return m_DecimalRoundNumber;
-}
-
-/////////////////////////
-
-void VChart_Base::setDecimalRoundNumber(int DecimalRoundNumber)
-{
-    m_DecimalRoundNumber = DecimalRoundNumber;
+    m_DecimalRoundNumberX = DecimalRoundNumberX;
+    m_DecimalRoundNumberY = DecimalRoundNumberY;
 }
 
 /////////////////////////
@@ -1220,7 +1215,7 @@ void VChart_Base::DoForeGrnPaitings()
         glColor4d( 1.0, 1.0, 1.0, 1.0 );
         renderText( m_LastMousePos.x() + 13,
                     m_LastMousePos.y() + 25,
-                    tr("( ")+QString::number(pos.x(), 'F', m_DecimalRoundNumber) + m_XScale+tr(", ")+QString::number(pos.y(), 'F', m_DecimalRoundNumber) + m_YScale +tr(" )"),
+                    tr("( ")+QString::number(pos.x(), 'F', m_DecimalRoundNumberX) + m_XScale+tr(", ")+QString::number(pos.y(), 'F', m_DecimalRoundNumberY) + m_YScale +tr(" )"),
                     font);
     }
 
@@ -1317,7 +1312,7 @@ void VChart_Base::DoForeGrnPaitings()
                 QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + horStep*i, m_BoundaryTop - posRatio.y()));
                 renderText( lPos.x(),
                             lPos.y(),
-                            QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumber),
+                            QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumberX),
                             font);
             }
         }
@@ -1331,7 +1326,7 @@ void VChart_Base::DoForeGrnPaitings()
                 QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + horStep*i + horDiff * 0.1, m_BoundaryTop - posRatio.y()));
                 renderText( lPos.x() - 25,
                             lPos.y() + 9,
-                            QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumber),
+                            QString::number( m_BoundaryLeft + horStep*i,'F', m_DecimalRoundNumberX),
                             font);
             }
         }
@@ -1349,7 +1344,7 @@ void VChart_Base::DoForeGrnPaitings()
                 QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));
                 renderText( lPos.x(),
                             height() - lPos.y(),
-                            QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumber),
+                            QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumberY),
                             font);
             }
         }
@@ -1363,7 +1358,7 @@ void VChart_Base::DoForeGrnPaitings()
                 QPointF lPos = ScopeToMouseCoor(QPointF(m_BoundaryLeft + posRatio.x(), m_BoundaryBottom + verStep*i));
                 renderText( lPos.x(),
                             height() - lPos.y(),
-                            QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumber),
+                            QString::number(m_BoundaryBottom + verStep*i, 'F', m_DecimalRoundNumberY),
                             font);
             }
         }

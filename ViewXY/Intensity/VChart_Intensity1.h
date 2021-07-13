@@ -1,7 +1,7 @@
 #ifndef VCHART_INTENSITY1_H
 #define VCHART_INTENSITY1_H
 
-#include <VChart/ViewXY/Intensity/VChart_Intensity.h>
+#include "ViewXY/Intensity/VChart_Intensity.h"
 
 class VChart_Intensity1 : public VChart_Intensity
 {

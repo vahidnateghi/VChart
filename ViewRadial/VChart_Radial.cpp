@@ -182,7 +182,7 @@ void VChart_Radial::DoForeGrnPaitings()
         glColor4d( 1.0, 1.0, 1.0, 1.0 );
         renderText( m_LastMousePos.x() + 13,
                     m_LastMousePos.y() + 25,
-                    tr("( ")+QString::number(pos.x(), 'F', m_DecimalRoundNumber) + m_XScale+tr(", ")+QString::number(pos.y(), 'F', m_DecimalRoundNumber) + m_YScale +tr(" )"),
+                    tr("( ")+QString::number(pos.x(), 'F', m_DecimalRoundNumberX) + m_XScale+tr(", ")+QString::number(pos.y(), 'F', m_DecimalRoundNumberY) + m_YScale +tr(" )"),
                     font);
     }
 
