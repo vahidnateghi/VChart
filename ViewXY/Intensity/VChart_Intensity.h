@@ -1,13 +1,6 @@
 #ifndef GLINTENSITYGRID_H
 #define GLINTENSITYGRID_H
 
-//#include <QObject>
-//#include <QWidget>
-//#include <QOpenGLFunctions_3_0>
-//#include <QGLWidget>
-//#include <QMouseEvent>
-//#include <QGLFormat>
-//#include <QDebug>
 #include <ViewXY/VChart_XY.h>
 #include <Channels/Channel_Intensity.h>
 

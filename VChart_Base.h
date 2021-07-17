@@ -119,6 +119,8 @@ public:
     double AutoZoomYCoef() const;
     void setAutoZoomYCoef(double AutoZoomYCoef);
 
+    void InitiGL();
+
 protected:
     QElapsedTimer           m_RenderETimer;
     QElapsedTimer           m_AutoZoomETimer;
@@ -180,6 +182,7 @@ protected:
     Enum_AxisStyle          m_AxisStyleY;
     double                  m_AutoZoomXCoef;
     double                  m_AutoZoomYCoef;
+    bool                    m_IsInitialized;
 
     QOpenGLShaderProgram    m_Program;
 

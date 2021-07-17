@@ -45,4 +45,4 @@ SOURCES +=  \
     $$PWD/Channels/Channel_Polar.cpp
 
 RESOURCES += \
-    $$PWD/res.qrc
+    $$PWD/res_VChart.qrc

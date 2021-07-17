@@ -38,6 +38,7 @@ enum Enum_ZoomType
 
 enum Enum_AutoZoomType
 {
+    AutoZoom_None,
     AutoZoom_Default,
     AutoZoom_Calculated,
     AutoZoom_PeriodicCalculated

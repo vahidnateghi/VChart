@@ -34,9 +34,7 @@ void VChart_Intensity1::paintGL()
                 glColorPointer( 4, GL_DOUBLE, sizeof(vVertex), ((GLubyte*) NULL + (3 * sizeof(double))) );
 
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, 2 * tChannel->XReso() );
-
             }
-
         }
     }
 

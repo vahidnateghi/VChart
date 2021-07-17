@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/Shaders">
-        <file alias="RPntFShader">Shaders/RPntFShader.glsl</file>
-        <file alias="RPntVShader">Shaders/RPntVShader.glsl</file>
-    </qresource>
-</RCC>

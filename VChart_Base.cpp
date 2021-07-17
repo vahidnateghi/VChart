@@ -27,6 +27,8 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
     m_YScale                                = "";
     m_Message                               = "";
 
+    m_IsInitialized                         = false;
+
     m_LastMousePos                          = QPointF(0,0);
     m_MousePanBasePos                       = QPointF(0,0);
     m_MouseBasePos                          = QPointF(0,0);
@@ -85,6 +87,8 @@ VChart_Base::VChart_Base(QWidget *parent) : QGLWidget(parent)
     m_UpdateInterval                        = 100;
     m_AutoZoomInterval                      = 1000;
     m_DecimalRoundNumber                    = 2;
+
+    show();
 }
 
 // /////////////////////// PUBLIC
@@ -380,6 +384,8 @@ void VChart_Base::initializeGL()
                                                                 "}\n" );
     if( !m_Program.link() )
         qDebug() << "Link Fail!";
+
+    m_IsInitialized = true;
 }
 
 /////////////////////////
@@ -392,6 +398,8 @@ void VChart_Base::resizeGL(int w, int h)
     setBoundaries( false );
 
     update();
+
+    m_IsInitialized = true;
 }
 
 /////////////////////////
@@ -1029,6 +1037,13 @@ double VChart_Base::AutoZoomYCoef() const
 void VChart_Base::setAutoZoomYCoef(double AutoZoomYCoef)
 {
     m_AutoZoomYCoef = AutoZoomYCoef;
+}
+
+void VChart_Base::InitiGL()
+{
+    initializeGL();
+    resizeGL(100, 100);
+//    updateGL();
 }
 
 /////////////////////////
