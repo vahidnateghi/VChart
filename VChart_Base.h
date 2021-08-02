@@ -118,6 +118,8 @@ public:
     double AutoZoomYCoef() const;
     void setAutoZoomYCoef(double AutoZoomYCoef);
 
+    void SetChannelVisible(int Idx, bool visible);
+
     void InitiGL();
 
 protected:

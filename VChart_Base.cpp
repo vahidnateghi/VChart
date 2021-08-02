@@ -1037,7 +1037,18 @@ void VChart_Base::InitiGL()
 {
     initializeGL();
     resizeGL(100, 100);
-//    updateGL();
+
+    updateGL();
+}
+
+/////////////////////////
+
+void VChart_Base::SetChannelVisible(int Idx, bool visible)
+{
+    if( Idx < 0 || Idx >= m_Channels.size()  )
+        return;
+
+    m_Channels[Idx]->setIsVisible( visible );
 }
 
 /////////////////////////
