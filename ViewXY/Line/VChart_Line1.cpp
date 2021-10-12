@@ -24,9 +24,11 @@ void VChart_Line1::paintGL()
         {
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glVertexPointer( 3, GL_DOUBLE, sizeof(vVertex), &(tChannel->Points()->data()[0].x) );
-
-            glColor3d( tChannel->LineColor().redF(), tChannel->LineColor().greenF(), tChannel->LineColor().blueF() );
-            glDrawArrays(GL_LINE_STRIP, 0, tChannel->Points()->count());
+            if(tChannel->ShowLines())
+            {
+                glColor3d( tChannel->LineColor().redF(), tChannel->LineColor().greenF(), tChannel->LineColor().blueF() );
+                glDrawArrays(GL_LINE_STRIP, 0, tChannel->Points()->count());
+            }
             if( tChannel->ShowPoints() )
             {
                 glColor3d( tChannel->PointColor().redF(), tChannel->PointColor().greenF(), tChannel->PointColor().blueF() );

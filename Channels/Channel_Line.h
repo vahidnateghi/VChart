@@ -20,10 +20,14 @@ public:
 
     QVector<vVertex> *Points();
 
+    bool ShowLines() const;
+    void setShowLines(bool ShowLines);
+
 private:
     double m_PointSize;
     double m_LineSize;
     bool m_ShowPoints;
+    bool m_ShowLines;
     QVector<vVertex>* m_Points;
 
 };

@@ -4,7 +4,7 @@ VChart_XY::VChart_XY(QWidget *parent) : VChart_Base(parent)
 {
 }
 
-void VChart_XY::AddChannel(QString Title, QColor PointColor, QColor LineColor, double PointSize, double LineSize, bool ShowPoints)
+void VChart_XY::AddChannel(QString Title, QColor PointColor, QColor LineColor, double PointSize, double LineSize, bool ShowPoints, bool ShowLines)
 {
     Channel_Line* Chnl = new Channel_Line();
 
@@ -14,7 +14,7 @@ void VChart_XY::AddChannel(QString Title, QColor PointColor, QColor LineColor, d
     Chnl->setPointSize( PointSize );
     Chnl->setLineSize( LineSize );
     Chnl->setShowPoints( ShowPoints );
-
+    Chnl->setShowLines(ShowLines);
     m_Channels.append( Chnl );
 }
 

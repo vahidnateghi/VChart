@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QGLWidget>
 #include <QOpenGLFunctions_3_0>
-#include <QOpenGLExtraFunctions>
 #include <QMouseEvent>
 #include <QEvent>
 #include <QWheelEvent>
@@ -17,11 +16,11 @@
 #include "VChartDefines.h"
 #include "Channels/Channel_Base.h"
 
-#define MAX_VALUE 9999999999999
-#define MIN_VALUE -999999999999
+#define MAX_VALUE 9999999999999999
+#define MIN_VALUE -9999999999999999
 #define MAX_DEPTH 10.0
 
-class VChart_Base : public QGLWidget, protected /*QOpenGLExtraFunctions*/QOpenGLFunctions_3_0
+class VChart_Base : public QGLWidget, protected QOpenGLFunctions_3_0
 {
     Q_OBJECT
 public:

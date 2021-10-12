@@ -44,3 +44,13 @@ QVector<vVertex> *Channel_Line::Points()
     return m_Points;
 }
 
+bool Channel_Line::ShowLines() const
+{
+    return m_ShowLines;
+}
+
+void Channel_Line::setShowLines(bool ShowLines)
+{
+    m_ShowLines = ShowLines;
+}
+

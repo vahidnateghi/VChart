@@ -27,13 +27,21 @@ void VChart_Scatter::AddChannel(QString Title, QColor Color, Enum_PointShape Poi
 
 void VChart_Scatter::AddPoints(int Idx, const QList<QPointF> &pnt, bool Update)
 {
-    if(Idx < 0 || Idx >= m_Channels.count() || pnt.count() == 0)
+    if(Idx < 0 || Idx >= m_Channels.count() )
         return;
+
+    if( pnt.count() == 0 )
+        Clear( Idx );
 
     Channel_Scatter* tChannel = (Channel_Scatter *)m_Channels[Idx];
 
     QVector<vVertex> tPoints;
     int tPntSize = 0;
+
+    m_AutoZoomMaxX                          = (double)MIN_VALUE;
+    m_AutoZoomMinX                          = (double)MAX_VALUE;
+    m_AutoZoomMaxY                          = (double)MIN_VALUE;
+    m_AutoZoomMinY                          = (double)MAX_VALUE;
 
     QPointF tSize = QPointF(tChannel->PointSizeX(), tChannel->PointSizeY());
 
@@ -176,8 +184,18 @@ void VChart_Scatter::AddPoints(int Idx, const QList<QPointF> &pnt, bool Update)
 
 void VChart_Scatter::AddPoints(int Idx, const QList<QPointF> &Points, const QList<QString> &Labels, bool Update)
 {
-    if(Idx < 0 || Idx >= m_Channels.count() || Points.count() == 0)
+    if(Idx < 0 || Idx >= m_Channels.count() )
         return;
+
+    if( Points.count() == 0 )
+    {
+        Clear( Idx );
+    }
+
+    m_AutoZoomMaxX                          = (double)MIN_VALUE;
+    m_AutoZoomMinX                          = (double)MAX_VALUE;
+    m_AutoZoomMaxY                          = (double)MIN_VALUE;
+    m_AutoZoomMinY                          = (double)MAX_VALUE;
 
     Channel_Scatter* tChannel = (Channel_Scatter *)m_Channels[Idx];
 

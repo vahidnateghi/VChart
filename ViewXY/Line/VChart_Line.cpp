@@ -14,6 +14,11 @@ void VChart_Line::SetPoints(int Idx, const QVector<double> &XPoints, const QVect
 
     tChannel->Points()->clear();
 
+//    m_AutoZoomMaxX                          = (double)MIN_VALUE;
+//    m_AutoZoomMinX                          = (double)MAX_VALUE;
+//    m_AutoZoomMaxY                          = (double)MIN_VALUE;
+//    m_AutoZoomMinY                          = (double)MAX_VALUE;
+
     for( int i = 0; i < XPoints.count(); i++ )
     {
         vVertex Pnt(XPoints.at(i), YPoints.at(i), 0);
@@ -47,6 +52,11 @@ void VChart_Line::SetPoints(int Idx, const QVector<long long> &YPoints)
     Channel_Line* tChannel = (Channel_Line*)m_Channels.at(Idx);
 
     tChannel->Points()->clear();
+
+//    m_AutoZoomMaxX                          = (double)MIN_VALUE;
+//    m_AutoZoomMinX                          = (double)MAX_VALUE;
+//    m_AutoZoomMaxY                          = (double)MIN_VALUE;
+//    m_AutoZoomMinY                          = (double)MAX_VALUE;
 
     for( int i = 0; i < YPoints.count(); i++ )
     {

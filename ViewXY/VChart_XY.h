@@ -10,13 +10,13 @@ class VChart_XY : public VChart_Base
 public:
     explicit VChart_XY(QWidget *parent = nullptr);
 
-    void AddChannel(
-            QString Title = "",
+    void AddChannel(QString Title = "",
             QColor PointColor = Qt::red,
             QColor LineColor = Qt::green,
             double PointSize = 1,
             double LineSize = 1,
-            bool ShowPoints = false);
+            bool ShowPoints = false,
+            bool ShowLines = true);
 
     void Clear();
 
